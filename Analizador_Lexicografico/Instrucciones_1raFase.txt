@@ -1,0 +1,6 @@
+Que hay que implementar para la primera fase del proyecto de Traductores
+
+--- Objetivos del Analizador Lexicografico ---
+
+    - Generar tokens 
+    - Generar errores estaticos 
