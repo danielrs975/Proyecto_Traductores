@@ -4,3 +4,99 @@ Que hay que implementar para la primera fase del proyecto de Traductores
 
     - Generar tokens 
     - Generar errores estaticos 
+
+--- Entrada y salida del Analizador ---
+
+Secuencia de caracteres (Programa) -------> Tokens relevantes reconocidos 
+
+    - Si no se reconocen los caracteres como parte de nuestro lenguaje 
+    se debe arrojar error
+    - Todo token deber ir acompanado de su de numero de fila y columna
+
+--- Palabras claves del lenguaje ---
+
+    - begin         
+    - while 
+    - bool 
+    - if 
+    - var
+    - etc.... 
+
+Una palabra clave es identificada asi Tk<Palabra Clave> Ejemplo TkBegin
+
+--- Variables --- 
+
+Cada identificador de variable le corresponde un token llamado TkId. Ejemplo:
+Si se lee "contador" se dara como salida TkId("contador")
+
+--- Numero --- 
+
+Son identificados con el token TkNum. Ejemplo: TkNum(30)
+
+--- Booleanos --- 
+
+Estan representados por 2 tokens que son: TkTrue y TkFalse 
+
+--- Caracteres --- 
+
+Estan representados por el siguiente token TkCaracter. Ejemplo: 'p' estaria representado
+como TkCaracter('p')
+
+--- Separadores --- 
+
+    - "," - TkComa 
+    - "." - TkPunto 
+    - ":" - TkDosPuntos
+    - "(" - TkParAbre 
+    - ")" - TkParCierra 
+    - "[" - TkCorcheteAbre "]" - TkCorcheteCierra 
+    - "{" - TkLlaveAbre 
+    - "}" - TkLlaveCierra 
+    - "->" - TkHacer 
+    - "<-" - TkAsignacion
+
+--- Operadores aritmeticos, booleanos, relacionales, o de otro tipo ---
+
+    - "+"   - TkSuma                  - ">=" - TkMayorIgual 
+    - "-"   - TkResta                 - "="  - TkIgual 
+    - "*"   - TkMult                  - "++" - TkSiguienteChar
+    - "/"   - TkDiv                   - "--" - TkAnteriorChar 
+    - "%"   - TkMod                   - "#"  - TkValorAscii 
+    - "/\"  - TkConjuncion            - "::" - TkConcatenacion
+    - "\/"  - TkDisyuncion            - "$"  - TkShift
+    - "not" - TkNegacion 
+    - "<"   - TkMenor 
+    - "<="  - TkMenorIgual 
+    - ">"   - TkMayor
+
+----> NOTA: Espacios en blanco, tabuladores y saltos de linea deben ser ignorados. Otros caracteres
+deben ser reportados como error 
+
+--- Ejemplo de entrada y salida --- 
+
+ENTRADA:                                        SALIDA:
+with                                            TkWith 1 1, 
+    var contador : int                          TkVar 2 5, TkId("contador") 2 9, TkDosPuntos 2 18, TkInt 2 20  
+begin                                           TkBegin 4 1 
+    contador <- 35                              TkId("contador") 7 5, TkAsignacion 7 14, TkNum(35), 7 17, TkPunto 7 14 
+end                                             TkEnd 8 1
+
+----> NOTA: El analizador lexicografico solo es capaz de reconocer secuencias arbitrarias de tokens. Sin 
+importar que sean sintacticamente incorrectas 
+
+--- Ejemplo de errores --- 
+
+with                                    Error: Caracter inesperado "!" en la fila 2, columna 20  
+    var contador : !int                 Error: Caracter inesperado "?" en la fila 7, columna 13 
+begin 
+    contador? <- 35 
+end
+
+----> NOTA IMPORTANTE: Si existe al menos un error en el programa: Solo deben imprimirse los errores no los tokens 
+que esten correctos. 
+
+----> Lenguaje a utilizar: Python. Libreria: PLY 
+
+----> IMPORTANTE: EJECUCION DEL ANALIZADOR LEXICOGRAFICO 
+Para ejecutar el analizador es a traves del siguiente comando: ./lex <Archivo>. 
+Elaborar script para ejecutarlo de esta manera. 
