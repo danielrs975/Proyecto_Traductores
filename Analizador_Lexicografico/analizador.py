@@ -2,54 +2,168 @@
 
 import ply.lex as lex 
 
+# Diccionario de palabras reservadas
+
+reserved = {
+	'begin' : 'TkBegin',
+	'if' : 'TkIf',
+	'while' : 'TkWhile',
+	'bool' : 'TkBool',
+	'var' : 'TkVar',
+	'with' : 'TkWith',
+	'int' : 'TkInt',
+	'End' : 'TkEnd'
+}
+
+
 # Diccionarios de tokens 
 
-tokens = (
-    #--------------------------------------------------------------
-    # Token para variables 
-    'TkId',
+tokens = [
+	#--------------------------------------------------------------
+	# Token para variables 
+	'TkId',
 
-    # Token para numero
-    'TkNum',
+	# Token para numero
+	'TkNum',
 
-    # Token para booleanos                         Esta seccion se tienen
-    'TkTrue',                                     # que definir funciones
-    'TkFalse',
+	# Token para booleanos                         Esta seccion se tienen
+	'TkTrue',                                     # que definir funciones
+	'TkFalse',
 
-    # Token para caracteres 
-    'TkCaracter',
-    #---------------------------------------------------------------
+	# Token para caracteres 
+	'TkCaracter',
+	#---------------------------------------------------------------
 
-    # Tokens para separadores 
-    'TkComa',               # ","
-    'TkPunto',              # "."
-    'TkDosPuntos',          # ":"
-    'TkParAbre',            # "("
-    'TkParCierra',          # ")"
-    'TkCorcheteAbre',       # "["
-    'TkCorcheteCierra',     # "]"
-    'TkLlaveAbre',          # "{"
-    'TkLlaveCierra',        # "}"
-    'TkHacer',              # "->"
-    'TkAsignacion',         # "<-"
+	# Tokens para separadores 
+	'TkComa',               # ","
+	'TkPunto',              # "."
+	'TkDosPuntos',          # ":"
+	'TkParAbre',            # "("
+	'TkParCierra',          # ")"
+	'TkCorcheteAbre',       # "["
+	'TkCorcheteCierra',     # "]"
+	'TkLlaveAbre',          # "{"
+	'TkLlaveCierra',        # "}"
+	'TkHacer',              # "->"
+	'TkAsignacion',         # "<-"
 
-    # Tokens operadores aritmeticos, booleanos, relacionales, o de otro tipo
-    'TkSuma',               # "+"
-    'TkResta',              # "-"
-    'TkMult',               # "*"
-    'TkDiv',                # "/"
-    'TkMod',                # "%"
-    'TkConjuncion',         # "/\"
-    'TkDisyuncion',         # "\/"
-    'TkNegacion',           # "not"
-    'TkMenor',              # "<"
-    'TkMenorIgual',         # "<="
-    'TkMayor',              # ">"
-    'TkMayorIgual',         # ">="
-    'TkIgual',              # "="
-    'TkSiguienteChar',      # "++"
-    'TkAnteriorChar',       # "--"
-    'TkValorAscii',         # "#"
-    'TkConcatenacion',      # "::"
-    'TkShift',              # "$"
-)
+	# Tokens operadores aritmeticos, booleanos, relacionales, o de otro tipo
+	'TkSuma',               # "+"
+	'TkResta',              # "-"
+	'TkMult',               # "*"
+	'TkDiv',                # "/"
+	'TkMod',                # "%"
+	'TkConjuncion',         # "/\"
+	'TkDisyuncion',         # "\/"
+	'TkNegacion',           # "not"
+	'TkMenor',              # "<"
+	'TkMenorIgual',         # "<="
+	'TkMayor',              # ">"
+	'TkMayorIgual',         # ">="
+	'TkIgual',              # "="
+	'TkSiguienteChar',      # "++"
+	'TkAnteriorChar',       # "--"
+	'TkValorAscii',         # "#"
+	'TkConcatenacion',      # "::"
+	'TkShift',              # "$"
+] + list(reserved.values())
+
+
+
+
+# Reglas para las expresiones regulares de tokens simples de sepradores,
+# aritmeticos, booleanos, relacionales, etc
+
+#t_TkHacer
+# t_TkAsignacion
+# t_TkSiguienteChar
+t_TkSuma = r'\+'
+# TkAnteriorChar
+t_TkResta = r'\-'
+t_TkMult = r'\*'
+# t_TkConjuncion = r'\/\'
+# t_TkDisyuncion = r'\\/'
+t_TkDiv = r'\/'
+t_TkMod = r'\%'
+# t_TkNegacion 
+# t_TkMenorIgual
+t_TkMenor = r'\<'
+# t_TkMayorIgual
+t_TkMayor = r'\>'
+t_TkIgual = r'\='
+t_TkValorAscii = r'\#'
+# t_TkConcatenacion 
+t_TkShift = r'\$'
+t_TkComa           = r'\,'
+t_TkPunto          = r'\.'
+t_TkDosPuntos      = r'\:'
+t_TkParAbre        = r'\('
+t_TkParCierra      = r'\)'
+t_TkCorcheteAbre   = r'\['
+t_TkCorcheteCierra = r'\]'
+t_TkLlaveAbre      = r'\{'
+t_TkLlaveCierra    = r'\}'
+
+#Regla de expresion regular para valores booleanos
+
+t_TkTrue  = r'True'
+t_TkFalse = r'False'
+
+# Regla para hacer match con un identificador y buscar 
+# entre las palabras reservadas
+
+def t_TkId(t):
+	r'[a-zA-Z_][a-zA-Z_0-9]*'
+	t.type = reserved.get(t.value,'TkId')    # Check for reserved words
+	return t
+
+# Regla de expresion regular para los numeros
+
+def t_TkNum(t):
+	r'\d+'
+	t.value = int(t.value)    
+	return t
+
+# Regla para definir el numero de la line
+
+def t_newline(t):
+	r'\n+'
+	t.lexer.lineno += len(t.value)
+
+# Columnas
+
+def find_column(input, token):
+	line_start = input.rfind('\n', 0, token.lexpos) + 1
+	return (token.lexpos - line_start) + 1
+
+# Regla para manejar errores
+
+def t_error(t):
+	print("Caracter ilegal '%s'" % t.value[0])
+	t.lexer.skip(1)
+
+# Regla de expresion regular de literales para caracteres
+
+# literals = r'[(-=^\]+|,.)*"{}a-zA-Z_0-9'
+
+# Un String que contiene caracteres ignorados: espacios, tabuladores
+# y saltos de lineas
+
+t_ignore  = ' \t\n'
+
+# Se construye el lexer
+
+lexer = lex.lex()
+
+data = '''
+with
+		var contador : !int
+	begin
+		contador? <- 35.
+end
+'''
+
+lexer.input(data)
+
+for tok in lexer:
+	print(tok)
