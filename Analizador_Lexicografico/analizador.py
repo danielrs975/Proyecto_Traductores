@@ -93,7 +93,7 @@ t_TkMayor = r'\>'
 t_TkIgual = r'\='
 t_TkValorAscii = r'\#'
 # t_TkConcatenacion 
-t_TkShift = r'\$'
+t_TkShift          = r'\$'
 t_TkComa           = r'\,'
 t_TkPunto          = r'\.'
 t_TkDosPuntos      = r'\:'
@@ -109,6 +109,7 @@ t_TkLlaveCierra    = r'\}'
 t_TkTrue  = r'True'
 t_TkFalse = r'False'
 
+
 # Regla para hacer match con un identificador y buscar 
 # entre las palabras reservadas
 
@@ -117,12 +118,33 @@ def t_TkId(t):
 	t.type = reserved.get(t.value,'TkId')    # Check for reserved words
 	return t
 
+# Regla para hacer match con un caracter
+
+def t_TkCaracter(t):
+    r"'[!-z]'"
+    return t 
+
+# Imprimir los Tk_Caracter  
+
+def print_TkCaracter(t):
+    return "TkCaracter(" + t.value + ")" + " " + str(t.lineno) + " " + str(t.lexpos)
+
+# Funcion para imprimir un token del tipo nombre variable 
+
+def print_TkId(t):
+    return 'TkId("' + t.value + '")' + " " + str(t.lineno) + " " + str(t.lexpos)
+
 # Regla de expresion regular para los numeros
 
 def t_TkNum(t):
 	r'\d+'
 	t.value = int(t.value)    
 	return t
+
+# Funcion para imprimir un token de tipo numero 
+
+def print_TkNum(t):
+    return "TkNum(" + str(t.value) + ")" + " " + str(t.lineno) + " " + str(t.lexpos)
 
 # Regla para definir el numero de la line
 
@@ -156,14 +178,22 @@ t_ignore  = ' \t\n'
 lexer = lex.lex()
 
 data = '''
-with
-		var contador : !int
-	begin
-		contador? <- 35.
-end
+with\nvar 7contador : char\nbegin\ncontador <- 'p'.\nend\n
 '''
 
 lexer.input(data)
 
+# Variable que va a almacenar la salida del analizador 
+salida = ""
+
 for tok in lexer:
-	print(tok)
+    if tok.type == 'TkNum':
+        salida = salida + " " + print_TkNum(tok)
+    elif tok.type == 'TkId':
+        salida = salida + " " + print_TkId(tok)
+    elif tok.type == 'TkCaracter':
+        salida = salida + " " + print_TkCaracter(tok)
+    else:
+        salida = salida + " " + tok.type + " " + str(tok.lineno) + " " + str(tok.lexpos)
+
+print(salida) 
