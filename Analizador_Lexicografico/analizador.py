@@ -12,7 +12,10 @@ reserved = {
 	'var' : 'TkVar',
 	'with' : 'TkWith',
 	'int' : 'TkInt',
-	'End' : 'TkEnd'
+	'End' : 'TkEnd',
+	'True': 'TkTrue',
+	'False': 'TkFalse',
+	'not': 'TkNegacion',
 }
 
 
@@ -25,10 +28,6 @@ tokens = [
 
 	# Token para numero
 	'TkNum',
-
-	# Token para booleanos                         Esta seccion se tienen
-	'TkTrue',                                     # que definir funciones
-	'TkFalse',
 
 	# Token para caracteres 
 	'TkCaracter',
@@ -55,7 +54,6 @@ tokens = [
 	'TkMod',                # "%"
 	'TkConjuncion',         # "/\"
 	'TkDisyuncion',         # "\/"
-	'TkNegacion',           # "not"
 	'TkMenor',              # "<"
 	'TkMenorIgual',         # "<="
 	'TkMayor',              # ">"
@@ -74,40 +72,40 @@ tokens = [
 # Reglas para las expresiones regulares de tokens simples de sepradores,
 # aritmeticos, booleanos, relacionales, etc
 
-#t_TkHacer
-# t_TkAsignacion
-# t_TkSiguienteChar
-t_TkSuma = r'\+'
-# TkAnteriorChar
-t_TkResta = r'\-'
-t_TkMult = r'\*'
-# t_TkConjuncion = r'\/\'
-# t_TkDisyuncion = r'\\/'
-t_TkDiv = r'\/'
-t_TkMod = r'\%'
-# t_TkNegacion 
-# t_TkMenorIgual
-t_TkMenor = r'\<'
-# t_TkMayorIgual
-t_TkMayor = r'\>'
-t_TkIgual = r'\='
-t_TkValorAscii = r'\#'
-# t_TkConcatenacion 
-t_TkShift          = r'\$'
-t_TkComa           = r'\,'
-t_TkPunto          = r'\.'
-t_TkDosPuntos      = r'\:'
-t_TkParAbre        = r'\('
-t_TkParCierra      = r'\)'
-t_TkCorcheteAbre   = r'\['
-t_TkCorcheteCierra = r'\]'
-t_TkLlaveAbre      = r'\{'
-t_TkLlaveCierra    = r'\}'
+t_TkHacer 			= r'\-\>'
+t_TkAsignacion 		= r'\<\-'
+t_TkSiguienteChar 	= r'\+\+'
+t_TkSuma 			= r'\+'
+TkAnteriorChar 		= r'\-\-'
+t_TkResta 			= r'\-'
+t_TkMult 			= r'\*'
+t_TkConjuncion 		= r'\/\\'
+t_TkDisyuncion 		= r'\\\/'
+t_TkDiv 			= r'\/'
+t_TkMod 			= r'\%'
+t_TkNegacion 		= r'not' 
+t_TkMenorIgual 		= r'\<\='
+t_TkMenor 			= r'\<'
+t_TkMayorIgual 		= r'\>\='
+t_TkMayor 			= r'\>'
+t_TkIgual 			= r'\='
+t_TkValorAscii 		= r'\#'
+t_TkConcatenacion 	= r'\:\:'
+t_TkShift          	= r'\$'
+t_TkComa           	= r'\,'
+t_TkPunto          	= r'\.'
+t_TkDosPuntos      	= r'\:'
+t_TkParAbre        	= r'\('
+t_TkParCierra      	= r'\)'
+t_TkCorcheteAbre   	= r'\['
+t_TkCorcheteCierra 	= r'\]'
+t_TkLlaveAbre      	= r'\{'
+t_TkLlaveCierra    	= r'\}'
 
 #Regla de expresion regular para valores booleanos
 
-t_TkTrue  = r'True'
 t_TkFalse = r'False'
+t_TkTrue  = r'True'
 
 
 # Regla para hacer match con un identificador y buscar 
@@ -178,7 +176,7 @@ t_ignore  = ' \t\n'
 lexer = lex.lex()
 
 data = '''
-with\nvar 7contador : char\nbegin\ncontador <- 'p'.\nend\n
+with\nvar 7contador : char\nbegin\ncontador <- True .\nend\n
 '''
 
 lexer.input(data)
