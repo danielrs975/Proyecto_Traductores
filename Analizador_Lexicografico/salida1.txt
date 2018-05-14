@@ -1,0 +1,5 @@
+TkWith 1 1,
+TkVar 2 5, TkId("contador") 2 9, TkDosPuntos 2 18, TkInt 2 20,
+TkBegin 4 1,
+TkId("contador") 7 5, TkAsignacion 7 14, TkNum(35) 7 17, TkPunto 7 19
+TkEnd 8 1

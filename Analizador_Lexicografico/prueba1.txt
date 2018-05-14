@@ -1,0 +1,8 @@
+with
+    var contador : char
+
+
+begin
+    contador < True.
+
+end
