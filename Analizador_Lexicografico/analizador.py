@@ -117,6 +117,12 @@ class Analizador_Lexicografico(object):
 	t_TkFalse = r'False'
 	t_TkTrue  = r'True'
 
+	# Regla para reconocer errores de tipo "35numero"
+
+	def t_NumStr(self, t):
+		r'\d+[a-zA-Z]+'
+		self.print_error_strNum(t)
+
 
 	# Regla para hacer match con un identificador y buscar 
 	# entre las palabras reservadas
@@ -181,6 +187,15 @@ class Analizador_Lexicografico(object):
 
 	t_ignore  = ' \t'
 
+	def print_error_strNum(self, t):
+		caracteresError = "" 
+		for i in t.value:
+			if not (ord(i) > 65 and ord(i) < 90) and not (ord(i) > 97 and ord(i) < 122):
+				caracteresError += i 
+
+		self.erroresLex.append('Error: Caracter inesperado "%s" en la fila' % caracteresError + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t)))
+		t.lexer.skip(1)
+
 	def print_error(self, t):
 		return 'Error: Caracter inesperado "%s" en la fila' % t.value[0] + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t))
 
@@ -216,6 +231,7 @@ class Analizador_Lexicografico(object):
 		self.lexer.input(data)
 		self.entradaDatos = data 
 		for tok in self.lexer:
+			
 			if tok.type == 'TkNum':
 				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkNum(tok) +  str(self.find_column(data, tok))
 			elif tok.type == 'TkId':
@@ -225,6 +241,8 @@ class Analizador_Lexicografico(object):
 			else:
 				salida = salida + self.mismaLinea(tok.lineno) + tok.type + " " + str(tok.lineno) + " " + str(self.find_column(data, tok))
 
+		# Si existen errores en el archivo de entrada solo se tiene que imprimir tales 
+		# errores no los otros tokens 
 		if len(self.erroresLex) > 0:
 			salida = ""
 			for i in self.erroresLex:
@@ -235,6 +253,6 @@ class Analizador_Lexicografico(object):
 		return salida 
 
 
-# prueba = Analizador_Lexicografico()
-# prueba.build()
-# prueba.test("prueba2.txt")
+# m = Analizador_Lexicografico()
+# m.build()
+# print(m.test("prueba2.txt"))

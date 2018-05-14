@@ -1,0 +1,5 @@
+with 
+    var 34numero : int
+begin 
+    numero <- 23.
+end

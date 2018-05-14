@@ -25,6 +25,14 @@ class AnalizadorLexTester(unittest.TestCase):
         resultadoEsperado = resultadoEsperado.read()
         self.assertEqual(resultadoEsperado, analizador_lex.test("prueba2.txt"))
 
+    # Prueba que verifique que no ocurra nombre de variables del tipo 34numero
+    def testNumStr(self):
+        analizador_lex = Analizador_Lexicografico()
+        analizador_lex.build()
+        resultadoEsperado = open("salida3.txt")
+        resultadoEsperado = resultadoEsperado.read()
+        self.assertEqual(resultadoEsperado, analizador_lex.test("prueba3.txt"))
+
 
 if __name__ == '__main__':
     unittest.main()
