@@ -1,0 +1,2 @@
+Error: Caracter inesperado "!" en la fila 2, columna 20
+Error: Caracter inesperado "?" en la fila 7, columna 13
