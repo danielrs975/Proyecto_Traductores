@@ -5,6 +5,9 @@ import ply.lex as lex
 # Diccionario de palabras reservadas
 
 class Analizador_Lexicografico(object):
+	# Variables globales
+	numero_linea_anterior = 0
+
 	reserved = {
 		'begin' : 'TkBegin',
 		'if' : 'TkIf',
@@ -13,7 +16,7 @@ class Analizador_Lexicografico(object):
 		'var' : 'TkVar',
 		'with' : 'TkWith',
 		'int' : 'TkInt',
-		'End' : 'TkEnd',
+		'end' : 'TkEnd',
 		'True': 'TkTrue',
 		'False': 'TkFalse',
 		'not': 'TkNegacion',
@@ -44,6 +47,7 @@ class Analizador_Lexicografico(object):
 		'TkCorcheteCierra',     # "]"
 		'TkLlaveAbre',          # "{"
 		'TkLlaveCierra',        # "}"
+		'TkPuntoYComa',			# ";"
 		'TkHacer',              # "->"
 		'TkAsignacion',         # "<-"
 
@@ -102,6 +106,7 @@ class Analizador_Lexicografico(object):
 	t_TkCorcheteCierra 	= r'\]'
 	t_TkLlaveAbre      	= r'\{'
 	t_TkLlaveCierra    	= r'\}'
+	t_TkPuntoYComa		= r'\;'
 
 	#Regla de expresion regular para valores booleanos
 
@@ -186,18 +191,28 @@ class Analizador_Lexicografico(object):
 		# Se llama a la funcion para testear el lexer 
 		return string
 
+	# Funcion que responde a la pregunta. El token esta en la misma linea ?
+	def mismaLinea(self, linea_actual):
+		if linea_actual != self.numero_linea_anterior:
+			self.numero_linea_anterior = linea_actual
+			return "\n"
+		else:
+			return ", "
+
 	# Se prueba el tester
 	def test(self, data):
 		salida = ""
+		self.numero_linea_anterior = 0		
 		data = self.read_archive(data)
 		self.lexer.input(data)
 		for tok in self.lexer:
 			if tok.type == 'TkNum':
-				salida = salida + " " + self.print_TkNum(tok) +  str(self.find_column(data, tok))
+				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkNum(tok) +  str(self.find_column(data, tok))
 			elif tok.type == 'TkId':
-				salida = salida + " " + self.print_TkId(tok) + str(self.find_column(data, tok))
+				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkId(tok) + str(self.find_column(data, tok))
 			elif tok.type == 'TkCaracter':
-				salida = salida + " " + self.print_TkCaracter(tok) + str(self.find_column(data, tok))
+				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkCaracter(tok) + str(self.find_column(data, tok))
 			else:
-				salida = salida + " " + tok.type + " " + str(tok.lineno) + " " + str(self.find_column(data, tok))
+				salida = salida + self.mismaLinea(tok.lineno) + tok.type + " " + str(tok.lineno) + " " + str(self.find_column(data, tok))
+		salida = salida[1:] 
 		return salida 
