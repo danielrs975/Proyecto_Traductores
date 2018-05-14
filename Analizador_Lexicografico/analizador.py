@@ -8,6 +8,10 @@ class Analizador_Lexicografico(object):
 	# Variables globales
 	numero_linea_anterior = 0
 
+	erroresLex = []
+
+	entradaDatos = ""
+
 	reserved = {
 		'begin' : 'TkBegin',
 		'if' : 'TkIf',
@@ -165,7 +169,7 @@ class Analizador_Lexicografico(object):
 	# Regla para manejar errores
 
 	def t_error(self, t):
-		print("Caracter ilegal '%s'" % t.value[0])
+		self.erroresLex.append(self.print_error(t))
 		t.lexer.skip(1)
 
 	# Regla de expresion regular de literales para caracteres
@@ -177,6 +181,9 @@ class Analizador_Lexicografico(object):
 
 	t_ignore  = ' \t'
 
+	def print_error(self, t):
+		return 'Error: Caracter inesperado "%s" en la fila' % t.value[0] + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t))
+
 	# Se construye el lexer
 
 	def build(self, **kwargs):
@@ -187,7 +194,6 @@ class Analizador_Lexicografico(object):
 		entrada = open(archive, "r")
 		string = entrada.read()
 		
-		print(string)
 		# Se llama a la funcion para testear el lexer 
 		return string
 
@@ -202,9 +208,13 @@ class Analizador_Lexicografico(object):
 	# Se prueba el tester
 	def test(self, data):
 		salida = ""
-		self.numero_linea_anterior = 0		
+		
+		self.erroresLex = []
+		self.numero_linea_anterior = 0	
+
 		data = self.read_archive(data)
 		self.lexer.input(data)
+		self.entradaDatos = data 
 		for tok in self.lexer:
 			if tok.type == 'TkNum':
 				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkNum(tok) +  str(self.find_column(data, tok))
@@ -214,5 +224,17 @@ class Analizador_Lexicografico(object):
 				salida = salida + self.mismaLinea(tok.lineno) + self.print_TkCaracter(tok) + str(self.find_column(data, tok))
 			else:
 				salida = salida + self.mismaLinea(tok.lineno) + tok.type + " " + str(tok.lineno) + " " + str(self.find_column(data, tok))
-		salida = salida[1:] 
+
+		if len(self.erroresLex) > 0:
+			salida = ""
+			for i in self.erroresLex:
+				salida = salida + i + "\n"
+			salida = salida[:-1]
+		else:
+			salida = salida[1:] 
 		return salida 
+
+
+# prueba = Analizador_Lexicografico()
+# prueba.build()
+# prueba.test("prueba2.txt")
