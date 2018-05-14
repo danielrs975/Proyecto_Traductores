@@ -126,12 +126,12 @@ class Analizador_Lexicografico(object):
 	# Imprimir los Tk_Caracter  
 
 	def print_TkCaracter(self, t):
-		return "TkCaracter(" + t.value + ")" + " " + str(t.lineno) + " " + str(t.lexpos)
+		return "TkCaracter(" + t.value + ")" + " " + str(t.lineno) + " "
 
 	# Funcion para imprimir un token del tipo nombre variable 
 
 	def print_TkId(self, t):
-		return 'TkId("' + t.value + '")' + " " + str(t.lineno) + " " + str(t.lexpos)
+		return 'TkId("' + t.value + '")' + " " + str(t.lineno) + " "
 
 	# Regla de expresion regular para los numeros
 
@@ -143,7 +143,7 @@ class Analizador_Lexicografico(object):
 	# Funcion para imprimir un token de tipo numero 
 
 	def print_TkNum(self, t):
-		return "TkNum(" + str(t.value) + ")" + " " + str(t.lineno) + " " + str(t.lexpos)
+		return "TkNum(" + str(t.value) + ")" + " " + str(t.lineno) + " "
 
 	# Regla para definir el numero de la line
 
@@ -170,7 +170,7 @@ class Analizador_Lexicografico(object):
 	# Un String que contiene caracteres ignorados: espacios, tabuladores
 	# y saltos de lineas
 
-	t_ignore  = ' \t\n'
+	t_ignore  = ' \t'
 
 	# Se construye el lexer
 
@@ -193,11 +193,11 @@ class Analizador_Lexicografico(object):
 		self.lexer.input(data)
 		for tok in self.lexer:
 			if tok.type == 'TkNum':
-				salida = salida + " " + self.print_TkNum(tok)
+				salida = salida + " " + self.print_TkNum(tok) +  str(self.find_column(data, tok))
 			elif tok.type == 'TkId':
-				salida = salida + " " + self.print_TkId(tok)
+				salida = salida + " " + self.print_TkId(tok) + str(self.find_column(data, tok))
 			elif tok.type == 'TkCaracter':
-				salida = salida + " " + self.print_TkCaracter(tok)
+				salida = salida + " " + self.print_TkCaracter(tok) + str(self.find_column(data, tok))
 			else:
-				salida = salida + " " + tok.type + " " + str(tok.lineno) + " " + str(tok.lexpos)
+				salida = salida + " " + tok.type + " " + str(tok.lineno) + " " + str(self.find_column(data, tok))
 		return salida 

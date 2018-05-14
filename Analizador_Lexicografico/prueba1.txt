@@ -1,8 +1,8 @@
 with
-    var contador : char
-
+    var contador : int
 
 begin
-    contador < True.
+    
 
-end
+    contador <- 35.
+End
