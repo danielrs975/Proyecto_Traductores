@@ -119,9 +119,9 @@ class Analizador_Lexicografico(object):
 
 	# Regla para reconocer errores de tipo "35numero"
 
-	def t_NumStr(self, t):
-		r'\d+[a-zA-Z]+'
-		self.print_error_strNum(t)
+	# def t_NumStr(self, t):
+	# 	r'\d+[a-zA-Z]+'
+	# 	self.print_error_strNum(t)
 
 
 	# Regla para hacer match con un identificador y buscar 
@@ -251,8 +251,3 @@ class Analizador_Lexicografico(object):
 		else:
 			salida = salida[1:] 
 		return salida 
-
-
-# m = Analizador_Lexicografico()
-# m.build()
-# print(m.test("prueba2.txt"))
