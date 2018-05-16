@@ -135,7 +135,7 @@ class Analizador_Lexicografico(object):
 	# Regla para hacer match con un caracter
 
 	def t_TkCaracter(self, t):
-		r"'[!-z]'"
+		r"'[!-z]+'"
 		return t 
 
 	# Imprimir los Tk_Caracter  
