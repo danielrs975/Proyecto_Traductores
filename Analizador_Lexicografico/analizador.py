@@ -1,3 +1,7 @@
+# Autores:
+#   Daniel Rodriguez 14-10955
+#   Yuni Quintero 14-10880
+
 # Aqui se importa la libreria para el reconocimiento de los tokens 
 
 import ply.lex as lex 
@@ -178,23 +182,19 @@ class Analizador_Lexicografico(object):
 		self.erroresLex.append(self.print_error(t))
 		t.lexer.skip(1)
 
-	# Regla de expresion regular de literales para caracteres
-
-	# literals = r'[(-=^\]+|,.)*"{}a-zA-Z_0-9'
-
 	# Un String que contiene caracteres ignorados: espacios, tabuladores
 	# y saltos de lineas
 
 	t_ignore  = ' \t'
 
-	def print_error_strNum(self, t):
-		caracteresError = "" 
-		for i in t.value:
-			if not (ord(i) > 65 and ord(i) < 90) and not (ord(i) > 97 and ord(i) < 122):
-				caracteresError += i 
+	# def print_error_strNum(self, t):
+	# 	caracteresError = "" 
+	# 	for i in t.value:
+	# 		if not (ord(i) > 65 and ord(i) < 90) and not (ord(i) > 97 and ord(i) < 122):
+	# 			caracteresError += i 
 
-		self.erroresLex.append('Error: Caracter inesperado "%s" en la fila' % caracteresError + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t)))
-		t.lexer.skip(1)
+	# 	self.erroresLex.append('Error: Caracter inesperado "%s" en la fila' % caracteresError + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t)))
+	# 	t.lexer.skip(1)
 
 	def print_error(self, t):
 		return 'Error: Caracter inesperado "%s" en la fila' % t.value[0] + " " + str(t.lineno) + ", columna " + str(self.find_column(self.entradaDatos, t))

@@ -1,3 +1,7 @@
+# Autores:
+#   Daniel Rodriguez 14-10955
+#   Yuni Quintero 14-10880
+
 import unittest
 
 # Se importa el analizador lexicografico 
