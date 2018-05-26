@@ -58,6 +58,7 @@ class Analizador_Lexicografico(object):
 		'TkPuntoYComa',			# ";"
 		'TkHacer',              # "->"
 		'TkAsignacion',         # "<-"
+		'TkDesigual',			# "/="
 
 		# Tokens operadores aritmeticos, booleanos, relacionales, o de otro tipo
 		'TkSuma',               # "+"
@@ -87,9 +88,10 @@ class Analizador_Lexicografico(object):
 
 	t_TkHacer 			= r'\-\>'
 	t_TkAsignacion 		= r'\<\-'
+	t_TkDesigual		= r'\/\='
 	t_TkSiguienteChar 	= r'\+\+'
 	t_TkSuma 			= r'\+'
-	TkAnteriorChar 		= r'\-\-'
+	t_TkAnteriorChar 	= r'\-\-'
 	t_TkResta 			= r'\-'
 	t_TkMult 			= r'\*'
 	t_TkConjuncion 		= r'\/\\'
@@ -139,7 +141,7 @@ class Analizador_Lexicografico(object):
 	# Regla para hacer match con un caracter
 
 	def t_TkCaracter(self, t):
-		r"'[!-z]+'"
+		r"'[!-z]'"
 		return t 
 
 	# Imprimir los Tk_Caracter  
