@@ -133,7 +133,7 @@ class Analizador_Lexicografico(object):
 	# Regla para hacer match con un identificador y buscar 
 	# entre las palabras reservadas
 
-	def t_TkId(self, t):
+	def t_TkId	(self, t):
 		r'[a-zA-Z_][a-zA-Z_0-9]*'
 		t.type = self.reserved.get(t.value,'TkId')    # Check for reserved words
 		return t

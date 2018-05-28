@@ -1,0 +1,9 @@
+with
+	var b : bool;
+begin
+    while b = x < y -> 
+        if b ->
+            x++y;
+        end;
+    end;
+end;

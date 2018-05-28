@@ -1,0 +1,6 @@
+begin
+    for i from 1 to 360 ->
+    	print i;
+    	i=0123;
+    end;
+end;

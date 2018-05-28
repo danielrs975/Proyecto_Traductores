@@ -1,0 +1,15 @@
+begin
+    print 'I';
+    var n,begin :: int;
+    while (read n) ->
+        with
+            var an : int;
+            var t : bool;
+        while an <= True ->
+                
+
+            an.
+        end;
+        ?
+    end;
+end;

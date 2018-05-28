@@ -1,0 +1,12 @@
+begin
+	var exp2 <- 1,exp <-2,exp1 : int
+	var a : array of bool
+	exp1 = (exp2 % 2) /\ (exp \/ exp1) /\ not exp3 + 3231 -0232 <- *2->;
+	read x;
+	var u <- 312++233, not <- true : char
+	not = false;
+	not = #u;
+	if u>=not \/ u==not /\ u<=te /\ uw23E > 23 \/ yR_34 < -2 -> 
+		print 'h';
+	end
+ end
