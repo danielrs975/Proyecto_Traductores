@@ -28,6 +28,15 @@ class Analizador_Lexicografico(object):
 		'True': 'TkTrue',
 		'False': 'TkFalse',
 		'not': 'TkNegacion',
+		'of': 'TkOf',
+		'array': 'TkArray',
+		'otherwise': 'TkOtherwise',
+		'read': 'TkRead',
+		'print': 'TkPrint',
+		'for': 'TkFor',
+		'from': 'TkFrom',
+		'to': 'TkTo',
+		'step': 'TkStep',
 	}
 
 
