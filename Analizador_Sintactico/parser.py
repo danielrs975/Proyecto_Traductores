@@ -11,11 +11,12 @@ from Analizador_Lexicografico.analizador import tokens, read_archive
 
 def p_programa(p):
     '''
-    programa    : TkWith lista_declaraciones TkBegin lista_instrucciones TkEnd
+    programa    : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
     '''
-    p[0] = p[4]
+    p[0] = "SECUENCIACION\n" + p[4]
 
 #------------------------ Este es la definicion del bloque de declaraciones ------------------#
+# Esta parte no hay que reportarla 
 def p_lista_declaraciones(p):
     '''
     lista_declaraciones : TkVar lista_identificadores TkDosPuntos tipo 
@@ -50,9 +51,9 @@ def p_empty(p):
 
 # ------------------- Esta es la gramatica para el bloque de instrucciones --------------------#
 
-def p_lista_instrucciones(p):
+def p_secuenciacion(p):
     '''
-    lista_instrucciones : instruccion TkPuntoYComa lista_instrucciones
+    secuenciacion : instruccion TkPuntoYComa secuenciacion
     '''
     if p[3] == None:
         p[0] = p[1]
@@ -60,10 +61,10 @@ def p_lista_instrucciones(p):
         p[0] = p[1] + "\n" + p[3]
         
 
-def p_lista_instrucciones_instruccion(p):
+def p_secuenciacion_instruccion(p):
     '''
-    lista_instrucciones : instruccion
-                        | empty
+    secuenciacion : instruccion
+                    | empty
     '''
     p[0] = p[1]
 
@@ -77,13 +78,13 @@ def p_asignacion(p):
     '''
     asignacion  : identificador TkAsignacion expresion 
     '''
-    p[0] = "ASIGNACION:\n\t-contenedor: " + p[1] + p[3]
+    p[0] = "\tASIGNACION:\n\t\t-contenedor: " + p[1] + p[3]
 
 def p_identificador(p):
     '''
     identificador   : TkId
     '''
-    p[0] = "VARIABLE\n\t\t-identificador: " + p[1]
+    p[0] = "VARIABLE\n\t\t\t-identificador: " + p[1]
 
 def p_expresion(p):
     '''
@@ -106,6 +107,7 @@ def p_expresion_aritmetica(p):
 def p_expresion_aritmetica_literal(p):
     '''
     expresion_aritmetica    : literal
+                            | empty
     '''
     p[0] = p[1]
 
@@ -117,13 +119,13 @@ def p_literal(p):
             | TkCaracter
     '''
     if isinstance(p[1], int):
-        p[0] = "\n\t-expresion: LITERAL ENTERO\n\t\t-valor: " + str(p[1])
+        p[0] = "\n\t\t-expresion: LITERAL ENTERO\n\t\t\t-valor: " + str(p[1])
     elif p[1] == 'true':
-        p[0] = "\n\t-expresion: LITERAL BOOLEANO\n\t\t-valor: " + p[1]
+        p[0] = "\n\t\t-expresion: LITERAL BOOLEANO\n\t\t\t-valor: " + p[1]
     elif p[1] == 'false':
-        p[0] = "\n\t-expresion: LITERAL BOOLEANO\n\t\t-valor: " + p[1]
+        p[0] = "\n\t\t-expresion: LITERAL BOOLEANO\n\t\t\t-valor: " + p[1]
     else:
-        p[0] = "\n\t-expresion: LITERAL CARACTER\n\t\t-valor: " + p[1]
+        p[0] = "\n\t\t-expresion: LITERAL CARACTER\n\t\t\t-valor: " + p[1]
         
         
         
