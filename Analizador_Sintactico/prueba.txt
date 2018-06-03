@@ -1,0 +1,7 @@
+with
+    var contador, bar : int
+begin
+    bar <- 'p' ;
+    bar2 <- 34 ;
+    bar3 <- false;
+end
