@@ -130,8 +130,8 @@ class Analizador_Lexicografico(object):
 
 	#Regla de expresion regular para valores booleanos
 
-	t_TkFalse = r'False'
-	t_TkTrue  = r'True'
+	t_TkFalse = r'false'
+	t_TkTrue  = r'true'
 
 	# Regla para reconocer errores de tipo "35numero"
 
