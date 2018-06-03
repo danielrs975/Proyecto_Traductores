@@ -1,0 +1,16 @@
+*.[oa]
+*~
+bin/
+include/
+lib/
+*.json
+ply/
+Analizador_Sintactico/Analizador_Lexicografico/calclex.py
+Analizador_Sintactico/Analizador_Lexicografico/__pycache__
+Analizador_Sintactico/Analizador_Lexicografico/analizador.pyc
+*.pdf
+Analizador_Sintactico/Analizador_Lexicografico/*.pyc
+Analizador_Sintactico/__pycache__/
+Analizador_Sintactico/parser.out
+Analizador_Sintactico/ejemplo.py
+Analizador_Sintactico/parsetab.py
