@@ -7,6 +7,79 @@
 import ply.lex as lex 
 
 # Diccionario de palabras reservadas
+reserved = {
+	'begin' : 'TkBegin',
+	'if' : 'TkIf',
+	'while' : 'TkWhile',
+	'bool' : 'TkBool',
+	'var' : 'TkVar',
+	'with' : 'TkWith',
+	'int' : 'TkInt',
+	'end' : 'TkEnd',
+	'true': 'TkTrue',
+	'false': 'TkFalse',
+	'not': 'TkNegacion',
+	'of': 'TkOf',
+	'array': 'TkArray',
+	'char': 'TkChar',
+	'otherwise': 'TkOtherwise',
+	'read': 'TkRead',
+	'print': 'TkPrint',
+	'for': 'TkFor',
+	'from': 'TkFrom',
+	'to': 'TkTo',
+	'step': 'TkStep',
+}
+
+
+	# Diccionarios de tokens 
+
+tokens = [
+	#--------------------------------------------------------------
+	# Token para variables 
+	'TkId',
+
+	# Token para numero
+	'TkNum',
+
+	# Token para caracteres 
+	'TkCaracter',
+	#---------------------------------------------------------------
+
+	# Tokens para separadores 
+	'TkComa',               # ","
+	'TkPunto',              # "."
+	'TkDosPuntos',          # ":"
+	'TkParAbre',            # "("
+	'TkParCierra',          # ")"
+	'TkCorcheteAbre',       # "["
+	'TkCorcheteCierra',     # "]"
+	'TkLlaveAbre',          # "{"
+	'TkLlaveCierra',        # "}"
+	'TkPuntoYComa',			# ";"
+	'TkHacer',              # "->"
+	'TkAsignacion',         # "<-"
+	'TkDesigual',			# "/="
+
+	# Tokens operadores aritmeticos, booleanos, relacionales, o de otro tipo
+	'TkSuma',               # "+"
+	'TkResta',              # "-"
+	'TkMult',               # "*"
+	'TkDiv',                # "/"
+	'TkMod',                # "%"
+	'TkConjuncion',         # "/\"
+	'TkDisyuncion',         # "\/"
+	'TkMenor',              # "<"
+	'TkMenorIgual',         # "<="
+	'TkMayor',              # ">"
+	'TkMayorIgual',         # ">="
+	'TkIgual',              # "="
+	'TkSiguienteChar',      # "++"
+	'TkAnteriorChar',       # "--"
+	'TkValorAscii',         # "#"
+	'TkConcatenacion',      # "::"
+	'TkShift',              # "$"
+] + list(reserved.values())
 
 class Analizador_Lexicografico(object):
 	# Variables globales
@@ -15,83 +88,6 @@ class Analizador_Lexicografico(object):
 	erroresLex = []
 
 	entradaDatos = ""
-
-	reserved = {
-		'begin' : 'TkBegin',
-		'if' : 'TkIf',
-		'while' : 'TkWhile',
-		'bool' : 'TkBool',
-		'var' : 'TkVar',
-		'with' : 'TkWith',
-		'int' : 'TkInt',
-		'end' : 'TkEnd',
-		'true': 'TkTrue',
-		'false': 'TkFalse',
-		'not': 'TkNegacion',
-		'of': 'TkOf',
-		'array': 'TkArray',
-		'char': 'TkChar',
-		'otherwise': 'TkOtherwise',
-		'read': 'TkRead',
-		'print': 'TkPrint',
-		'for': 'TkFor',
-		'from': 'TkFrom',
-		'to': 'TkTo',
-		'step': 'TkStep',
-	}
-
-
-	# Diccionarios de tokens 
-
-	tokens = [
-		#--------------------------------------------------------------
-		# Token para variables 
-		'TkId',
-
-		# Token para numero
-		'TkNum',
-
-		# Token para caracteres 
-		'TkCaracter',
-		#---------------------------------------------------------------
-
-		# Tokens para separadores 
-		'TkComa',               # ","
-		'TkPunto',              # "."
-		'TkDosPuntos',          # ":"
-		'TkParAbre',            # "("
-		'TkParCierra',          # ")"
-		'TkCorcheteAbre',       # "["
-		'TkCorcheteCierra',     # "]"
-		'TkLlaveAbre',          # "{"
-		'TkLlaveCierra',        # "}"
-		'TkPuntoYComa',			# ";"
-		'TkHacer',              # "->"
-		'TkAsignacion',         # "<-"
-		'TkDesigual',			# "/="
-
-		# Tokens operadores aritmeticos, booleanos, relacionales, o de otro tipo
-		'TkSuma',               # "+"
-		'TkResta',              # "-"
-		'TkMult',               # "*"
-		'TkDiv',                # "/"
-		'TkMod',                # "%"
-		'TkConjuncion',         # "/\"
-		'TkDisyuncion',         # "\/"
-		'TkMenor',              # "<"
-		'TkMenorIgual',         # "<="
-		'TkMayor',              # ">"
-		'TkMayorIgual',         # ">="
-		'TkIgual',              # "="
-		'TkSiguienteChar',      # "++"
-		'TkAnteriorChar',       # "--"
-		'TkValorAscii',         # "#"
-		'TkConcatenacion',      # "::"
-		'TkShift',              # "$"
-	] + list(reserved.values())
-
-
-
 
 	# Reglas para las expresiones regulares de tokens simples de sepradores,
 	# aritmeticos, booleanos, relacionales, etc
@@ -145,7 +141,7 @@ class Analizador_Lexicografico(object):
 
 	def t_TkId	(self, t):
 		r'[a-zA-Z_][a-zA-Z_0-9]*'
-		t.type = self.reserved.get(t.value,'TkId')    # Check for reserved words
+		t.type = reserved.get(t.value,'TkId')    # Check for reserved words
 		return t
 
 	# Regla para hacer match con un caracter
