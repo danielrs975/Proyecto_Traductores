@@ -93,6 +93,31 @@ def p_expresion(p):
     '''
     p[0] = p[1]
     
+def p_operadores_binarios(p):
+    '''expresion  : expresion TkSuma term
+                  | expresion TkResta term
+       term       : term TkMult factor
+                  | term TkDiv factor
+                  | term TkMod factor'''
+    if p[2] == '+':
+        p[0] = p[1] + p[3]
+    elif p[2] == '-':
+        p[0] = p[1] - p[3]
+    elif p[2] == '*':
+        p[0] = p[1] * p[3]
+    elif p[2] == '/':
+        p[0] = p[1] / p[3]
+    elif p[2] == '%':
+        p[0] = p[1] % p[3]
+
+#revisar unary minus
+
+precedence = (
+    ('nonassoc', 'TkMenor','TkMenorIgual','TkMayor', 'TkMayorIgual'),
+    ('left', 'TkSuma', 'TkResta'),
+    ('left', 'TkMult', 'TkDiv'),
+    ('left', 'TkMod')
+)
 
 def p_expresion_aritmetica(p):
     '''
