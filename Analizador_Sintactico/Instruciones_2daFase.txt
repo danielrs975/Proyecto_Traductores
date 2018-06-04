@@ -1,0 +1,22 @@
+
+Hacer las reglas de gramaticas para los siguientes tipos:
+
+    -Estructura del programa----------------------------------Hecho 
+
+    -Instrucciones:
+        --Asignación------------------------------------------Hecho
+        --Secuenciacion---------------------------------------Hecho
+        --Condicionales---------------------------------------Parcialmente Hecho 
+        --Iteracion Indeterminada-----------------------------No hecho 
+        --Iteracion Determinada-------------------------------No hecho 
+        --Incorporacion de alcance----------------------------Hecho pero no probado 
+        --Entrada y Salida------------------------------------No hecho 
+
+    -Expresiones:
+        --Literales-------------------------------------------Hecho
+        --Variables-------------------------------------------Hecho
+        --Expresiones Aritmeticas-----------------------------No hecho 
+        --Expresiones Booleanas-------------------------------Hecho
+        --Expresiones de caracteres---------------------------No hecho 
+        --Expresiones con arreglos----------------------------No hecho 
+        --Expresiones relacionales----------------------------No hecho 
