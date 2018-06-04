@@ -10,13 +10,16 @@ Hacer las reglas de gramaticas para los siguientes tipos:
         --Iteracion Indeterminada-----------------------------No hecho 
         --Iteracion Determinada-------------------------------No hecho 
         --Incorporacion de alcance----------------------------Hecho pero no probado 
-        --Entrada y Salida------------------------------------No hecho 
+        --Entrada y Salida------------------------------------Hecho 
 
     -Expresiones:
         --Literales-------------------------------------------Hecho
         --Variables-------------------------------------------Hecho
-        --Expresiones Aritmeticas-----------------------------No hecho 
+        --Expresiones Aritmeticas-----------------------------Hecho
         --Expresiones Booleanas-------------------------------Hecho
         --Expresiones de caracteres---------------------------No hecho 
         --Expresiones con arreglos----------------------------No hecho 
         --Expresiones relacionales----------------------------No hecho 
+
+
+IMPORTANTE ARREGLAR EL FORMATO DE SALIDA
