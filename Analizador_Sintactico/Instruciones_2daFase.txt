@@ -6,10 +6,10 @@ Hacer las reglas de gramaticas para los siguientes tipos:
     -Instrucciones:
         --Asignación------------------------------------------Hecho
         --Secuenciacion---------------------------------------Hecho
-        --Condicionales---------------------------------------Parcialmente Hecho 
+        --Condicionales---------------------------------------Hecho 
         --Iteracion Indeterminada-----------------------------No hecho 
         --Iteracion Determinada-------------------------------No hecho 
-        --Incorporacion de alcance----------------------------Hecho pero no probado 
+        --Incorporacion de alcance----------------------------Hecho
         --Entrada y Salida------------------------------------Hecho 
 
     -Expresiones:

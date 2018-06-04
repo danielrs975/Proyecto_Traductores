@@ -13,7 +13,7 @@ def p_programa(p):
     '''
     programa    : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
     '''
-    p[0] = "SECUENCIACION\n" + p[4]
+    p[0] = p[4]
 
 #------------------------ Este es la definicion del bloque de declaraciones ------------------#
 # Esta parte no hay que reportarla 
@@ -56,9 +56,9 @@ def p_secuenciacion(p):
     secuenciacion : instruccion TkPuntoYComa secuenciacion
     '''
     if p[3] == None:
-        p[0] = p[1]
+        p[0] = ('SECUENCIACION',p[1])
     else:
-        p[0] = p[1] + "\n" + p[3]
+        p[0] = ('SECUENCIACION', p[1],p[3])
         
 
 def p_secuenciacion_instruccion(p):
@@ -73,6 +73,7 @@ def p_instruccion(p):
     instruccion : asignacion
                 | condicional
                 | entrada_salida
+                | alcance
     '''
     p[0] = p[1]
 
@@ -81,21 +82,32 @@ def p_asignacion(p):
     '''
     asignacion  : identificador TkAsignacion expresion 
     '''
-    p[0] = "\tASIGNACION\n\t\t- contenedor: " + p[1] + p[3]
+    p[0] = ('ASIGNACION',p[1],p[3])
 
 def p_condicional(p):
     '''
     condicional : TkIf expresion_booleana TkHacer secuenciacion TkEnd
                 | TkIf expresion_relacional TkHacer secuenciacion TkEnd
+                | TkIf expresion_relacional TkHacer secuenciacion TkOtherwise TkHacer secuenciacion TkEnd
     '''
-    p[0] = "\tCONDICIONAL:\n\t\t- guardia: " + p[2] + "\n\t\t- exito: " + p[4]
+
+    if (len(p)>6):
+        p[0] = ('CONDICIONAL',p[2],p[4],p[7])
+    else:
+        p[0] = ('CONDICIONAL',p[2],p[4])
+
+def p_alcance(p):
+    '''
+    alcance : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
+    '''
+    p[0] = p[4]
 
 def p_entrada_salida(p):
     '''
     entrada_salida  : TkRead identificador
                     | TkPrint expresion
     '''
-    p[0] = "ENTRADA-SALIDA\n\t\t" + p[1] + " " + p[2]
+    p[0] = ('ENTRADA-SALIDA',p[1],p[2])
 
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#
@@ -104,7 +116,7 @@ def p_identificador(p):
     '''
     identificador   : TkId
     '''
-    p[0] = "VARIABLE\n\t\t\t- identificador: " + p[1]
+    p[0] = ('VARIABLE',p[1])
 
 def p_literal(p):
     '''
@@ -114,13 +126,13 @@ def p_literal(p):
             | TkCaracter
     '''
     if isinstance(p[1], int):
-        p[0] = "\n\t\t- expresion: LITERAL ENTERO\n\t\t\t- valor: " + str(p[1])
+        p[0] = ('LITERAL ENTERO',str(p[1]))
     elif p[1] == 'true':
-        p[0] = "\n\t\t- expresion: LITERAL BOOLEANO\n\t\t\t- valor: " + p[1]
+        p[0] = ('LITERAL BOOLEANO',p[1])
     elif p[1] == 'false':
-        p[0] = "\n\t\t- expresion: LITERAL BOOLEANO\n\t\t\t- valor: " + p[1]
+        p[0] = ('LITERAL BOOLEANO',p[1])
     else:
-        p[0] = "\n\t\t- expresion: LITERAL CARACTER\n\t\t\t- valor: " + p[1]
+        p[0] = ('LITERAL CARACTER',p[1])
 
 #--------------------------------------------------------------------------------------------#
 #--------------------------Tipos de expresiones----------------------------------------------#
@@ -142,7 +154,7 @@ def p_expresion_aritmetica(p):
                             | expresion_aritmetica TkDiv expresion_aritmetica
                             | expresion_aritmetica TkMod expresion_aritmetica
     '''
-    p[0] = str((p[2], p[1], p[3]))
+    p[0] = (p[2], p[1], p[3])
 
 
 precedence = (
@@ -175,9 +187,9 @@ def p_expresion_booleana(p):
         '\\/': 'Disyunción',
     }
     if p[1] == 'not':
-        p[0] = " EXP_BOOLEANA\n\t\t\t- operador: " + p[1] + "\n\t\t\t- operando: " + p[2]
+        p[0] = ('EXP_BOOLEANA',(p[1],p[2]))
     else:
-        p[0] = " EXP_BOOLEANA\n\t\t\t- operador: " + operadores[p[2]] + "\n\t\t\t- operador izquierdo: " + p[1] + "\n\t\t\t- operador derecho: " + p[3]        
+        p[0] = ('EXP_BOOLEANA',(p[2],p[1],p[3]))        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -207,7 +219,7 @@ def p_expresion_relacional(p):
         'TkMayorIgual': 'Mayor o igual que',
         'TkIgual': 'Igual que'
     }
-    p[0] = " BIN_RELACIONAL\n\t\t\t- operador: " + operadores[p[2]] + "\n\t\t\t- operador izquierdo: " + p[1] + "\n\t\t\t- operador derecho: " + p[3]
+    p[0] = ('BIN_RELACIONAL',(p[2],p[1],p[3]))
     
 
 
