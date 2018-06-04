@@ -209,35 +209,8 @@ def p_expresion_relacional(p):
     }
     p[0] = " BIN_RELACIONAL\n\t\t\t- operador: " + operadores[p[2]] + "\n\t\t\t- operador izquierdo: " + p[1] + "\n\t\t\t- operador derecho: " + p[3]
     
-        
 
-        
-        
-        
 
-# def p_asignacion(p):
-#     '''
-#     asignacion  : variable TkAsignacion expresion
-#     '''
-#     p[0] = "ASIGNACION:\n\t-contenedor: " + p[1] + p[3]
-
-# def p_expresion_num(p):
-#     '''
-#     expresion   : TkNum
-#     '''
-#     p[0] = "\n\t-expresion: LITERAL ENTERO\n\t\t-valor: " + str(p[1])  
-
-# def p_expresion_caracter(p):
-#     '''
-#     expresion : TkCaracter
-#     '''
-#     p[0] = "\n\t-expresion: LITERAL CARACTER\n\t\t-valor: " + str(p[1])  
-
-# def p_variable(p):
-#     '''
-#     variable    : TkId
-#     ''' 
-#     p[0] = "VARIABLE\n\t\t-identificador: " + p[1]
 
 parser = yacc.yacc()
 
