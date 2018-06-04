@@ -74,6 +74,8 @@ def p_instruccion(p):
                 | condicional
                 | entrada_salida
                 | alcance
+                | indeterminado
+                | determinado
     '''
     p[0] = p[1]
 
@@ -108,6 +110,22 @@ def p_entrada_salida(p):
                     | TkPrint expresion
     '''
     p[0] = ('ENTRADA-SALIDA',p[1],p[2])
+
+def p_indeterminado(p):
+    '''
+    indeterminado   : TkWhile expresion_relacional TkHacer secuenciacion TkEnd
+    '''
+    p[0] = ('ITERACION INDETERMINADA', p[2], p[4])
+
+def p_determinado(p):
+    '''
+    determinado     : TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkStep literal TkHacer secuenciacion TkEnd
+                    | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
+    '''
+    if(len(p)<12):
+        p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8])
+    else:
+        p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8], p[10])
 
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#

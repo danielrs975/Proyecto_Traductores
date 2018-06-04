@@ -7,8 +7,8 @@ Hacer las reglas de gramaticas para los siguientes tipos:
         --Asignación------------------------------------------Hecho
         --Secuenciacion---------------------------------------Hecho
         --Condicionales---------------------------------------Hecho 
-        --Iteracion Indeterminada-----------------------------No hecho 
-        --Iteracion Determinada-------------------------------No hecho 
+        --Iteracion Indeterminada-----------------------------Hecho 
+        --Iteracion Determinada-------------------------------Hecho 
         --Incorporacion de alcance----------------------------Hecho
         --Entrada y Salida------------------------------------Hecho 
 
@@ -19,7 +19,10 @@ Hacer las reglas de gramaticas para los siguientes tipos:
         --Expresiones Booleanas-------------------------------Hecho
         --Expresiones de caracteres---------------------------No hecho 
         --Expresiones con arreglos----------------------------No hecho 
-        --Expresiones relacionales----------------------------No hecho 
+        --Expresiones relacionales----------------------------Hecho
 
 
 IMPORTANTE ARREGLAR EL FORMATO DE SALIDA
+
+
+revisar expresiones booleanas compuestas etc
