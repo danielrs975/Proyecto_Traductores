@@ -242,11 +242,11 @@ def p_expresion_relacional(p):
 
 
 
-parser = yacc.yacc()
-
-entrada = read_archive(sys.argv[1])
-if len(entrada) == 0:
-    print('Error introduzca un archivo')
-else:
-    result = parser.parse(entrada)
-    print(result)
+if __name__ == "__main__":
+    parser = yacc.yacc()
+    entrada = read_archive(sys.argv[1])
+    if len(entrada) == 0:
+        print('Error introduzca un archivo')
+    else:
+        result = parser.parse(entrada)
+        print(result)
