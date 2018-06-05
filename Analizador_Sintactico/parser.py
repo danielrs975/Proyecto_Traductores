@@ -159,6 +159,7 @@ def p_expresion(p):
     expresion   : literal
                 | expresion_aritmetica 
                 | expresion_booleana
+                | expresion_caracteres
                 | expresion_relacional
     '''
     p[0] = p[1]
@@ -227,6 +228,39 @@ def p_expresion_booleana_literal_identificador(p):
     else:
         p[0] = p[1]
 
+def p_expresion_caracteres(p):
+    '''
+    expresion_caracteres    : expresion_caracteres TkSiguienteChar
+                            | expresion_caracteres TkAnteriorChar
+                            | TkValorAscii expresion_caracteres
+
+    '''
+    operadores = {
+        '++': 'Siguiente caracter',
+        '--': 'Caracter anterior',
+        '#' : 'Código ASCII'
+    }
+    
+    if p[1] == '#':
+        p[0] = (operadores[p[1]], p[2])
+    else:
+        p[0] = (operadores[p[2]], p[1])
+
+
+
+def p_expresion_caracteres_literal(p):
+    '''
+    expresion_caracteres    : literal
+                            | TkParAbre expresion_caracteres TkParCierra
+    '''
+    if len(p) > 2:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
+
+
+def p_expresion_arreglos(p):
+    pass
 
 def p_expresion_relacional(p):
     '''
