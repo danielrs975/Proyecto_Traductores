@@ -1,0 +1,6 @@
+# Autores:
+#   Daniel Rodriguez 14-10955
+#   Yuni Quintero 14-10880
+
+#!/bin/bash
+python3 parser.py $1
