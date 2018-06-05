@@ -89,7 +89,6 @@ def p_asignacion(p):
 def p_condicional(p):
     '''
     condicional : TkIf expresion_booleana TkHacer secuenciacion TkEnd
-                | TkIf expresion_relacional TkHacer secuenciacion TkEnd
                 | TkIf expresion_relacional TkHacer secuenciacion TkOtherwise TkHacer secuenciacion TkEnd
     '''
 
@@ -160,6 +159,7 @@ def p_expresion(p):
     expresion   : literal
                 | expresion_aritmetica 
                 | expresion_booleana
+                | expresion_relacional
     '''
     p[0] = p[1]
 
@@ -196,9 +196,13 @@ def p_expresion_aritmetica_literal_identificador(p):
 
 def p_expresion_booleana(p):
     '''
-    expresion_booleana  : expresion_booleana TkConjuncion expresion_booleana 
-                        | expresion_booleana TkDisyuncion expresion_booleana
+    expresion_booleana  : literal TkConjuncion expresion_booleana 
+                        | literal TkDisyuncion expresion_booleana
+                        | literal TkConjuncion expresion_relacional
+                        | literal TkDisyuncion expresion_relacional
                         | TkNegacion expresion_booleana
+                        | TkNegacion expresion_relacional 
+                        | expresion_relacional
     '''
     operadores = {
         '/\\': 'Conjunción',
