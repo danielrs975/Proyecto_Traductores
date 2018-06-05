@@ -56,7 +56,7 @@ def p_secuenciacion(p):
     secuenciacion : instruccion TkPuntoYComa secuenciacion
     '''
     if p[3] == None:
-        p[0] = ('SECUENCIACION',p[1])
+        p[0] = p[1]
     else:
         p[0] = ('SECUENCIACION', p[1],p[3])
         
@@ -89,7 +89,7 @@ def p_asignacion(p):
 def p_condicional(p):
     '''
     condicional : TkIf expresion_booleana TkHacer secuenciacion TkEnd
-                | TkIf expresion_relacional TkHacer secuenciacion TkOtherwise TkHacer secuenciacion TkEnd
+                | TkIf expresion_booleana TkHacer secuenciacion TkOtherwise TkHacer secuenciacion TkEnd
     '''
 
     if (len(p)>6):
@@ -123,7 +123,7 @@ def p_determinado(p):
     '''
     if(len(p)<12):
         p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8])
-    else:
+    else:   
         p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8], p[10])
 
 #--------------------------------------------------------------------------------------------#
@@ -166,11 +166,11 @@ def p_expresion(p):
 
 def p_expresion_aritmetica(p):
     '''
-    expresion_aritmetica    : expresion_aritmetica TkSuma expresion_aritmetica 
-                            | expresion_aritmetica TkResta expresion_aritmetica
-                            | expresion_aritmetica TkMult expresion_aritmetica
-                            | expresion_aritmetica TkDiv expresion_aritmetica
-                            | expresion_aritmetica TkMod expresion_aritmetica
+    expresion_aritmetica    : literal TkSuma expresion_aritmetica 
+                            | literal TkResta expresion_aritmetica
+                            | literal TkMult expresion_aritmetica
+                            | literal TkDiv expresion_aritmetica
+                            | literal TkMod expresion_aritmetica
     '''
     p[0] = (p[2], p[1], p[3])
 
@@ -210,8 +210,10 @@ def p_expresion_booleana(p):
     }
     if p[1] == 'not':
         p[0] = ('EXP_BOOLEANA',(p[1],p[2]))
+    elif len(p) == 2:
+        p[0] = p[1]
     else:
-        p[0] = ('EXP_BOOLEANA',(p[2],p[1],p[3]))        
+        p[0] = ('EXP_BOOLEANA',(operadores[p[2]],p[1],p[3]))        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -235,13 +237,13 @@ def p_expresion_relacional(p):
                             | expresion_aritmetica TkIgual expresion_aritmetica 
     '''
     operadores = {
-        'TkMenor': 'Menor que',
-        'TkMenorIgual': 'Menor o igual que',
-        'TkMayor': 'Mayor que',
-        'TkMayorIgual': 'Mayor o igual que',
-        'TkIgual': 'Igual que'
+        '<': 'Menor que',
+        '<=': 'Menor o igual que',
+        '>': 'Mayor que',
+        '>=': 'Mayor o igual que',
+        '=': 'Igual que'
     }
-    p[0] = ('BIN_RELACIONAL',(p[2],p[1],p[3]))
+    p[0] = ('BIN_RELACIONAL',(operadores[p[2]],p[1],p[3]))
     
 
 
