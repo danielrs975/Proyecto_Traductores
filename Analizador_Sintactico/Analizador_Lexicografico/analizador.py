@@ -54,8 +54,6 @@ tokens = [
 	'TkParCierra',          # ")"
 	'TkCorcheteAbre',       # "["
 	'TkCorcheteCierra',     # "]"
-	'TkLlaveAbre',          # "{"
-	'TkLlaveCierra',        # "}"
 	'TkPuntoYComa',			# ";"
 	'TkHacer',              # "->"
 	'TkAsignacion',         # "<-"
