@@ -117,8 +117,6 @@ t_TkParAbre        	= r'\('
 t_TkParCierra      	= r'\)'
 t_TkCorcheteAbre   	= r'\['
 t_TkCorcheteCierra 	= r'\]'
-t_TkLlaveAbre      	= r'\{'
-t_TkLlaveCierra    	= r'\}'
 t_TkPuntoYComa		= r'\;'
 
 #Regla de expresion regular para valores booleanos
