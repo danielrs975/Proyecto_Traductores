@@ -304,6 +304,19 @@ def p_expresion_relacional(p):
     }
     p[0] = ('BIN_RELACIONAL',(operadores[p[2]],p[1],p[3]))
     
+#------------------------------------ Clase para la construccion del arbol------------------------------#
+
+class Node:
+    def __init__(self, type,children=None,leaf=None):
+        self.type = type
+        if children:
+            self.children = children 
+        else:
+            self.children = []
+        self.leaf = leaf
+
+
+#------------------------------------ Se termina las reglas de la gramatica para BasicTran--------------#
 
 if __name__ == "__main__":
     parser = yacc.yacc()
