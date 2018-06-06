@@ -18,7 +18,7 @@ Hacer las reglas de gramaticas para los siguientes tipos:
         --Expresiones Aritmeticas-----------------------------Hecho
         --Expresiones Booleanas-------------------------------Hecho
         --Expresiones de caracteres---------------------------Hecho 
-        --Expresiones con arreglos----------------------------No hecho 
+        --Expresiones con arreglos----------------------------Hecho 
         --Expresiones relacionales----------------------------Hecho
 
 

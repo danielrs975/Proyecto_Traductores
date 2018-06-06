@@ -39,7 +39,7 @@ def p_tipo(p):
     tipo    : TkInt
             | TkBool
             | TkChar 
-            | TkArray
+            | TkArray TkCorcheteAbre literal TkCorcheteCierra TkOf tipo 
     '''
 # ---------------------------------------------------------------------------------------------#
 
@@ -160,6 +160,7 @@ def p_expresion(p):
                 | expresion_aritmetica 
                 | expresion_booleana
                 | expresion_caracteres
+                | expresion_arreglos
                 | expresion_relacional
     '''
     p[0] = p[1]
@@ -167,20 +168,20 @@ def p_expresion(p):
 
 def p_expresion_aritmetica(p):
     '''
-    expresion_aritmetica    : literal TkSuma expresion_aritmetica 
-                            | literal TkResta expresion_aritmetica
-                            | literal TkMult expresion_aritmetica
-                            | literal TkDiv expresion_aritmetica
-                            | literal TkMod expresion_aritmetica
+    expresion_aritmetica    : expresion_aritmetica TkSuma expresion_aritmetica 
+                            | expresion_aritmetica TkResta expresion_aritmetica
+                            | expresion_aritmetica TkMult expresion_aritmetica
+                            | expresion_aritmetica TkMod expresion_aritmetica
+                            | expresion_aritmetica TkDiv expresion_aritmetica
     '''
     p[0] = (p[2], p[1], p[3])
 
 
 precedence = (
     ('nonassoc', 'TkMenor','TkMenorIgual','TkMayor', 'TkMayorIgual'),
-    ('left', 'TkSuma', 'TkResta'),
-    ('left', 'TkMult', 'TkDiv'),
-    ('left', 'TkMod')
+    ('left', 'TkSuma', 'TkResta', 'TkValorAscii'),
+    ('left', 'TkMult', 'TkDiv', 'TkAnteriorChar'),
+    ('left', 'TkMod', 'TkSiguienteChar')
 )
 
 def p_expresion_aritmetica_literal_identificador(p):
@@ -197,10 +198,10 @@ def p_expresion_aritmetica_literal_identificador(p):
 
 def p_expresion_booleana(p):
     '''
-    expresion_booleana  : literal TkConjuncion expresion_booleana 
-                        | literal TkDisyuncion expresion_booleana
-                        | literal TkConjuncion expresion_relacional
-                        | literal TkDisyuncion expresion_relacional
+    expresion_booleana  : expresion_booleana TkConjuncion expresion_booleana
+                        | expresion_booleana TkDisyuncion expresion_booleana
+                        | expresion_relacional TkConjuncion expresion_relacional
+                        | expresion_relacional TkDisyuncion expresion_relacional
                         | TkNegacion expresion_booleana
                         | TkNegacion expresion_relacional 
                         | expresion_relacional
@@ -260,27 +261,49 @@ def p_expresion_caracteres_literal(p):
 
 
 def p_expresion_arreglos(p):
-    pass
+    '''
+    expresion_arreglos  : identificador TkConcatenacion expresion_arreglos
+                        | TkShift expresion_arreglos
+                        | expresion_arreglos TkCorcheteAbre expresion_aritmetica TkCorcheteCierra
+    '''
+    if len(p) == 4:
+        p[0] = ('Concatenación', p[1], p[3])
+    elif len(p) == 3:
+        p[0] = ('Shift', p[2])
+    else:
+        p[0] = ('Indexación', p[1], 'Posicion: ' + str(p[3]))
+    
+
+def p_expresion_arreglos_literal(p):
+    '''
+    expresion_arreglos  : identificador
+                        | TkParAbre expresion_arreglos TkParCierra 
+    '''
+    if len(p) == 4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1]
+
 
 def p_expresion_relacional(p):
     '''
     expresion_relacional    : expresion_aritmetica TkMenor expresion_aritmetica
-                            | expresion_aritmetica TkMenorIgual expresion_aritmetica 
-                            | expresion_aritmetica TkMayor expresion_aritmetica 
+                            | expresion_aritmetica TkMenorIgual expresion_aritmetica
+                            | expresion_aritmetica TkMayor expresion_aritmetica
                             | expresion_aritmetica TkMayorIgual expresion_aritmetica
-                            | expresion_aritmetica TkIgual expresion_aritmetica 
+                            | expresion_aritmetica TkIgual expresion_aritmetica
+                            | expresion_aritmetica TkDesigual expresion_aritmetica
     '''
     operadores = {
         '<': 'Menor que',
         '<=': 'Menor o igual que',
         '>': 'Mayor que',
         '>=': 'Mayor o igual que',
-        '=': 'Igual que'
+        '=': 'Igual que',
+        '/=': 'Desigual'
     }
     p[0] = ('BIN_RELACIONAL',(operadores[p[2]],p[1],p[3]))
     
-
-
 
 if __name__ == "__main__":
     parser = yacc.yacc()
