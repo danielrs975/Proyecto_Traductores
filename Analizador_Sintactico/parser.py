@@ -173,8 +173,12 @@ def p_expresion_aritmetica(p):
                             | expresion_aritmetica TkMult expresion_aritmetica
                             | expresion_aritmetica TkMod expresion_aritmetica
                             | expresion_aritmetica TkDiv expresion_aritmetica
+                            | TkResta expresion_aritmetica
     '''
-    p[0] = Node('EXP_ARITMETICA, ', [p[1], p[3]], p[2])
+    if len(p) > 3:
+        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], p[2])
+    else:
+        p[0] = Node('EXP_ARITMETICA', [p[2]], p[1])    
 
 
 precedence = (
@@ -211,11 +215,11 @@ def p_expresion_booleana(p):
         '\\/': 'Disyunción',
     }
     if p[1] == 'not':
-        p[0] = Node('EXP_BOOLEANA, ', [p[2]], p[1])
+        p[0] = Node('EXP_BOOLEANA', [p[2]], p[1])
     elif len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ('EXP_BOOLEANA, ',[p[1], p[3]], operadores[p[2]])        
+        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], operadores[p[2]])        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
