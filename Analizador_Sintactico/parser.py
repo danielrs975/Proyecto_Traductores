@@ -53,12 +53,12 @@ def p_empty(p):
 
 def p_secuenciacion(p):
     '''
-    secuenciacion : instruccion TkPuntoYComa secuenciacion
+    secuenciacion : instruccion secuenciacion
     '''
-    if p[3] == None:
+    if p[2] == None:
         p[0] = p[1]
     else:
-        p[0] = ('SECUENCIACION', p[1],p[3])
+        p[0] = Node('SECUENCIACION', [p[1], p[2]])
         
 
 def p_secuenciacion_instruccion(p):
@@ -82,9 +82,9 @@ def p_instruccion(p):
 #------------------- Tipos de instrucciones --------------------------------------------------#
 def p_asignacion(p):
     '''
-    asignacion  : identificador TkAsignacion expresion 
+    asignacion  : identificador TkAsignacion expresion TkPuntoYComa
     '''
-    p[0] = ('ASIGNACION',p[1],p[3])
+    p[0] = Node('ASIGNACION',[p[1], p[3]])
 
 def p_condicional(p):
     '''
@@ -93,9 +93,9 @@ def p_condicional(p):
     '''
 
     if (len(p)>6):
-        p[0] = ('CONDICIONAL',p[2],p[4],p[7])
+        p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]])
     else:
-        p[0] = ('CONDICIONAL',p[2],p[4])
+        p[0] = Node('CONDICIONAL',[p[2],p[4]])
 
 def p_alcance(p):
     '''
@@ -105,16 +105,16 @@ def p_alcance(p):
 
 def p_entrada_salida(p):
     '''
-    entrada_salida  : TkRead identificador
-                    | TkPrint expresion
+    entrada_salida  : TkRead identificador TkPuntoYComa
+                    | TkPrint expresion TkPuntoYComa
     '''
-    p[0] = ('ENTRADA-SALIDA',p[1],p[2])
+    p[0] = Node('ENTRADA-SALIDA',[p[2]], p[1])
 
 def p_indeterminado(p):
     '''
     indeterminado   : TkWhile expresion_relacional TkHacer secuenciacion TkEnd
     '''
-    p[0] = ('ITERACION INDETERMINADA', p[2], p[4])
+    p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]])
 
 def p_determinado(p):
     '''
@@ -122,9 +122,9 @@ def p_determinado(p):
                     | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
     '''
     if(len(p)<12):
-        p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8])
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8]])
     else:   
-        p[0] = ('ITERACION DETERMINADA', p[2], p[4], p[6], p[8], p[10])
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]])
 
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#
@@ -133,7 +133,7 @@ def p_identificador(p):
     '''
     identificador   : TkId
     '''
-    p[0] = ('VARIABLE',p[1])
+    p[0] = Node('VARIABLE',leaf=p[1])
 
 def p_literal(p):
     '''
@@ -143,13 +143,13 @@ def p_literal(p):
             | TkCaracter
     '''
     if isinstance(p[1], int):
-        p[0] = ('LITERAL ENTERO',str(p[1]))
+        p[0] = Node('LITERAL ENTERO',leaf=str(p[1]))
     elif p[1] == 'true':
-        p[0] = ('LITERAL BOOLEANO',p[1])
+        p[0] = Node('LITERAL BOOLEANO', leaf=p[1])
     elif p[1] == 'false':
-        p[0] = ('LITERAL BOOLEANO',p[1])
+        p[0] = Node('LITERAL BOOLEANO',leaf=p[1])
     else:
-        p[0] = ('LITERAL CARACTER',p[1])
+        p[0] = Node('LITERAL CARACTER',leaf=p[1])
 
 #--------------------------------------------------------------------------------------------#
 #--------------------------Tipos de expresiones----------------------------------------------#
@@ -174,7 +174,7 @@ def p_expresion_aritmetica(p):
                             | expresion_aritmetica TkMod expresion_aritmetica
                             | expresion_aritmetica TkDiv expresion_aritmetica
     '''
-    p[0] = (p[2], p[1], p[3])
+    p[0] = Node('EXP_ARITMETICA, ', [p[1], p[3]], p[2])
 
 
 precedence = (
@@ -211,11 +211,11 @@ def p_expresion_booleana(p):
         '\\/': 'Disyunción',
     }
     if p[1] == 'not':
-        p[0] = ('EXP_BOOLEANA',(p[1],p[2]))
+        p[0] = Node('EXP_BOOLEANA, ', [p[2]], p[1])
     elif len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = ('EXP_BOOLEANA',(operadores[p[2]],p[1],p[3]))        
+        p[0] = ('EXP_BOOLEANA, ',[p[1], p[3]], operadores[p[2]])        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -243,9 +243,9 @@ def p_expresion_caracteres(p):
     }
     
     if p[1] == '#':
-        p[0] = (operadores[p[1]], p[2])
+        p[0] = Node('EXP_CARACTER', [p[2]], operadores[p[1]])
     else:
-        p[0] = (operadores[p[2]], p[1])
+        p[0] = Node('EXP_CARACTER', [p[1]], p[2])
 
 
 
@@ -267,11 +267,11 @@ def p_expresion_arreglos(p):
                         | expresion_arreglos TkCorcheteAbre expresion_aritmetica TkCorcheteCierra
     '''
     if len(p) == 4:
-        p[0] = ('Concatenación', p[1], p[3])
+        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], 'Concatenacion')
     elif len(p) == 3:
-        p[0] = ('Shift', p[2])
+        p[0] = Node('EXP_ARREGLOS', [p[2]], 'Shift')
     else:
-        p[0] = ('Indexación', p[1], 'Posicion: ' + str(p[3]))
+        p[0] = Node('EXP_ARREGLOS', [p[1]])
     
 
 def p_expresion_arreglos_literal(p):
@@ -295,25 +295,43 @@ def p_expresion_relacional(p):
                             | expresion_aritmetica TkDesigual expresion_aritmetica
     '''
     operadores = {
-        '<': 'Menor que',
-        '<=': 'Menor o igual que',
-        '>': 'Mayor que',
-        '>=': 'Mayor o igual que',
-        '=': 'Igual que',
-        '/=': 'Desigual'
+        '<': "'Menor que'",
+        '<=': "'Menor o igual que'",
+        '>': "'Mayor que'",
+        '>=': "'Mayor o igual que'",
+        '=': "'Igual que'",
+        '/=': "'Desigual'"
     }
-    p[0] = ('BIN_RELACIONAL',(operadores[p[2]],p[1],p[3]))
+    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], operadores[p[2]])
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
 class Node:
-    def __init__(self, type,children=None,leaf=None):
+    def __init__(self, type, children=None,leaf=None):
         self.type = type
         if children:
             self.children = children 
         else:
             self.children = []
         self.leaf = leaf
+    
+    respuesta = ''
+
+    def __str__(self):
+        return self.dfs('')
+
+
+    def dfs(self, tabs):
+        self.respuesta += self.type + '\n'
+        tabs += '\t'
+        if self.leaf != None:
+            self.respuesta += tabs + '\t' + self.leaf + '\n'
+        for child in self.children:
+            self.respuesta += tabs + child.dfs(tabs)
+
+        return self.respuesta
+        
+
 
 
 #------------------------------------ Se termina las reglas de la gramatica para BasicTran--------------#
