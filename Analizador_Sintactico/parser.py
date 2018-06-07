@@ -92,10 +92,16 @@ def p_instruccion(p):
 def p_asignacion(p):
     '''
     asignacion  : identificador TkAsignacion expresion TkPuntoYComa
+                | identificador TkPunto expresion_aritmetica TkPuntoYComa
     '''
-    p[1].type = '- contenedor: ' + p[1].type
-    p[3].type = '- expresion: ' + p[3].type
-    p[0] = Node('ASIGNACION',[p[1], p[3]])
+    if p[2] == '<-':
+        p[1].type = '- contenedor: ' + p[1].type
+        p[3].type = '- expresion: ' + p[3].type
+        p[0] = Node('ASIGNACION',[p[1], p[3]])
+    else:
+        p[1].type = '- contenedor: ' + p[1].type
+        p[3].type = '- expresion: ' + p[3].type
+        p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto')
 
 def p_condicional(p):
     '''
@@ -180,6 +186,7 @@ def p_literal(p):
     else:
         p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1])
 
+
 #--------------------------------------------------------------------------------------------#
 #--------------------------Tipos de expresiones----------------------------------------------#
 
@@ -202,7 +209,6 @@ def p_expresion_aritmetica(p):
                             | expresion_aritmetica TkMult expresion_aritmetica
                             | expresion_aritmetica TkMod expresion_aritmetica
                             | expresion_aritmetica TkDiv expresion_aritmetica
-                            | TkResta expresion_aritmetica
     '''
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
@@ -212,12 +218,19 @@ def p_expresion_aritmetica(p):
         p[2].type = '- operador: ' + p[2].type 
         p[0] = Node('EXP_ARITMETICA', [p[2]], '- operacion: ' + p[1])    
 
+def p_expr_minus(p):
+    '''
+    expresion_aritmetica  : TkResta expresion_aritmetica %prec UMINUS
+    '''
+    p[0] = -p[2]
+    
 
 precedence = (
-    ('nonassoc', 'TkMenor','TkMenorIgual','TkMayor', 'TkMayorIgual'),
-    ('left', 'TkSuma', 'TkResta', 'TkValorAscii'),
-    ('left', 'TkMult', 'TkDiv', 'TkAnteriorChar'),
-    ('left', 'TkMod', 'TkSiguienteChar')
+    ('nonassoc','TkMenorIgual','TkMayor', 'TkMayorIgual', 'TkIgual', 'TkDesigual'),
+    ('left', 'TkSuma', 'TkResta', 'TkDisyuncion', 'TkSiguienteChar', 'TkConcatenacion'),
+    ('left', 'TkMod', 'TkMult', 'TkDiv', 'TkAnteriorChar', 'TkConjuncion', 'TkShift'),
+    ('left', 'TkValorAscii', 'TkNegacion', 'TkCorcheteAbre', 'TkCorcheteCierra'),
+    ('right', 'UMINUS')
 )
 
 def p_expresion_aritmetica_literal_identificador(p):
@@ -351,6 +364,12 @@ def p_expresion_relacional(p):
     p[1].type = '- operador izquierdo: ' + p[1].type
     p[3].type = '- operador derecho: ' + p[3].type 
     p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]])
+
+#-------------------------------------- Error ----------------------------------------------#
+
+def p_error(p):
+    print("Ha ocurrido un error de sintaxis. Abortando...")
+    sys.exit()
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
