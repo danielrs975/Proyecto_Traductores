@@ -5,6 +5,7 @@
 # Aqui se importa la libreria para el reconocimiento de los tokens 
 
 import ply.lex as lex 
+import sys
 
 # Diccionario de palabras reservadas
 reserved = {
@@ -215,43 +216,47 @@ def read_archive(archive):
 
 # Funcion que responde a la pregunta. El token esta en la misma linea ?
 def mismaLinea(linea_actual):
+	global numero_linea_anterior
 	if linea_actual != numero_linea_anterior:
 		numero_linea_anterior = linea_actual
 		return "\n"
 	else:
 		return ", "
 
+
 lexer = lex.lex()
-
-
 # Se prueba el tester
-# def test( data):
-# 	salida = ""
+def test( data):
+	salida = ""
+	salidaBuena = ""
 	
-# 	erroresLex = []
-# 	numero_linea_anterior = 0	
+	global erroresLex
+	erroresLex = []
+	numero_linea_anterior = 0	
 
-# 	data = read_archive(data)
-# 	lexer.input(data)
-# 	entradaDatos = data 
-# 	for tok in lexer:
+	data = read_archive(data)
+	lexer.input(data)
+	entradaDatos = data 
+	for tok in lexer:
 		
-# 		if tok.type == 'TkNum':
-# 			salida = salida + mismaLinea(tok.lineno) + print_TkNum(tok) +  str(find_column(data, tok))
-# 		elif tok.type == 'TkId':
-# 			salida = salida + mismaLinea(tok.lineno) + print_TkId(tok) + str(find_column(data, tok))
-# 		elif tok.type == 'TkCaracter':
-# 			salida = salida + mismaLinea(tok.lineno) + print_TkCaracter(tok) + str(find_column(data, tok))
-# 		else:
-# 			salida = salida + mismaLinea(tok.lineno) + tok.type + " " + str(tok.lineno) + " " + str(find_column(data, tok))
+		if tok.type == 'TkNum':
+			salidaBuena = salidaBuena + mismaLinea(tok.lineno) + print_TkNum(tok) +  str(find_column(data, tok))
+		elif tok.type == 'TkId':
+			salidaBuena = salidaBuena + mismaLinea(tok.lineno) + print_TkId(tok) + str(find_column(data, tok))
+		elif tok.type == 'TkCaracter':
+			salidaBuena = salidaBuena + mismaLinea(tok.lineno) + print_TkCaracter(tok) + str(find_column(data, tok))
+		else:
+			salidaBuena = salidaBuena + mismaLinea(tok.lineno) + tok.type + " " + str(tok.lineno) + " " + str(find_column(data, tok))
 
-# 	# Si existen errores en el archivo de entrada solo se tiene que imprimir tales 
-# 	# errores no los otros tokens 
-# 	if len(erroresLex) > 0:
-# 		salida = ""
-# 		for i in erroresLex:
-# 			salida = salida + i + "\n"
-# 		salida = salida[:-1]
-# 	else:
-# 		salida = salida[1:] 
-# 	return salida 
+	# Si existen errores en el archivo de entrada solo se tiene que imprimir tales 
+	# errores no los otros tokens 
+	if len(erroresLex) > 0:
+		salida = ""
+		for i in erroresLex:
+			salida = salida + i + "\n"
+		salida = salida[:-1]
+
+	return salida 
+
+if __name__ == "__main__":
+        print(test(sys.argv[1]))

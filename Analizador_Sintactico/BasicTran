@@ -3,4 +3,5 @@
 #   Yuni Quintero 14-10880
 
 #!/bin/bash
+python3 ./Analizador_Lexicografico/analizador.py $1
 python3 parser.py $1
