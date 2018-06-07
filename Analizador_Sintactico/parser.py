@@ -54,17 +54,25 @@ def p_empty(p):
 
 def p_secuenciacion(p):
     '''
-    secuenciacion : instruccion secuenciacion
+    secuenciacion : instruccion secuenciacion2
     '''
     if p[2] == None:
         p[0] = p[1]
     else:
         p[0] = Node('SECUENCIACION', [p[1], p[2]])
-        
+
+def p_secuenciacion2(p):
+    '''
+    secuenciacion2  : instruccion secuenciacion2
+    '''
+    if p[2] == None:
+        p[0] = p[1]
+    else:
+        p[0] = Node('', [p[1], p[2]])
 
 def p_secuenciacion_instruccion(p):
     '''
-    secuenciacion   : instruccion
+    secuenciacion2  : instruccion
                     | empty
     '''
     p[0] = p[1]
@@ -363,12 +371,24 @@ class Node:
 
 
     def dfs(self, tabs, tipo):
-        self.respuesta += self.type + '\n'
-        tabs += '\t'
+        if self.type != '':
+            self.respuesta += self.type + '\n'
+            tabs += '\t'
         if self.leaf != None:
             self.respuesta += tabs + self.leaf + '\n'
+        contador = 0
         for child in self.children:
-            self.respuesta += tabs + child.dfs(tabs, '')
+            contador += 1
+            if self.type != '':
+                self.respuesta += tabs + child.dfs(tabs, '')
+            else:
+                if contador == 2:
+                    self.respuesta += tabs + child.dfs(tabs, '')
+                else:
+                    self.respuesta += child.dfs(tabs, '')
+
+                
+
 
         return self.respuesta
 
