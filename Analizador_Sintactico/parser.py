@@ -121,7 +121,10 @@ def p_entrada_salida(p):
 def p_indeterminado(p):
     '''
     indeterminado   : TkWhile expresion_relacional TkHacer secuenciacion TkEnd
+                    | TkWhile expresion_booleana TkHacer secuenciacion TkEnd
     '''
+    p[2].type = '- guardia: ' + p[2].type
+    p[4].type = '- iteracion: ' + p[4].type
     p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]])
 
 def p_determinado(p):
