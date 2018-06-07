@@ -12,6 +12,7 @@ from Analizador_Lexicografico.analizador import tokens, read_archive
 def p_programa(p):
     '''
     programa    : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
+                | TkBegin secuenciacion TkEnd
     '''
     p[0] = p[4]
 
@@ -84,6 +85,8 @@ def p_asignacion(p):
     '''
     asignacion  : identificador TkAsignacion expresion TkPuntoYComa
     '''
+    p[1].type = '- contenedor: ' + p[1].type
+    p[3].type = '- expresion: ' + p[3].type
     p[0] = Node('ASIGNACION',[p[1], p[3]])
 
 def p_condicional(p):
@@ -95,6 +98,8 @@ def p_condicional(p):
     if (len(p)>6):
         p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]])
     else:
+        p[2].type = '- guardia: ' + p[2].type
+        p[4].type = '- exito: ' + p[4].type
         p[0] = Node('CONDICIONAL',[p[2],p[4]])
 
 def p_alcance(p):
@@ -133,7 +138,7 @@ def p_identificador(p):
     '''
     identificador   : TkId
     '''
-    p[0] = Node('VARIABLE',leaf=p[1])
+    p[0] = Node('VARIABLE',leaf="- identificador: " + p[1])
 
 def p_literal(p):
     '''
@@ -143,13 +148,13 @@ def p_literal(p):
             | TkCaracter
     '''
     if isinstance(p[1], int):
-        p[0] = Node('LITERAL ENTERO',leaf=str(p[1]))
+        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]))
     elif p[1] == 'true':
-        p[0] = Node('LITERAL BOOLEANO', leaf=p[1])
+        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1])
     elif p[1] == 'false':
-        p[0] = Node('LITERAL BOOLEANO',leaf=p[1])
+        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1])
     else:
-        p[0] = Node('LITERAL CARACTER',leaf=p[1])
+        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1])
 
 #--------------------------------------------------------------------------------------------#
 #--------------------------Tipos de expresiones----------------------------------------------#
@@ -176,9 +181,11 @@ def p_expresion_aritmetica(p):
                             | TkResta expresion_aritmetica
     '''
     if len(p) > 3:
-        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], p[2])
+        p[1].type = '- operador izquierdo: ' + p[1].type
+        p[3].type = '- operador derecho: ' + p[3].type
+        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2])
     else:
-        p[0] = Node('EXP_ARITMETICA', [p[2]], p[1])    
+        p[0] = Node('EXP_ARITMETICA', [p[2]], '- operacion: ' + p[1])    
 
 
 precedence = (
@@ -306,7 +313,9 @@ def p_expresion_relacional(p):
         '=': "'Igual que'",
         '/=': "'Desigual'"
     }
-    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], operadores[p[2]])
+    p[1].type = '- operador izquierdo: ' + p[1].type
+    p[3].type = '- operador derecho: ' + p[3].type 
+    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]])
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
@@ -320,20 +329,23 @@ class Node:
         self.leaf = leaf
     
     respuesta = ''
+    tipo = ''
 
     def __str__(self):
-        return self.dfs('')
+        return self.dfs('', self.tipo)
 
 
-    def dfs(self, tabs):
+    def dfs(self, tabs, tipo):
         self.respuesta += self.type + '\n'
         tabs += '\t'
         if self.leaf != None:
-            self.respuesta += tabs + '\t' + self.leaf + '\n'
+            self.respuesta += tabs + self.leaf + '\n'
         for child in self.children:
-            self.respuesta += tabs + child.dfs(tabs)
+            self.respuesta += tabs + child.dfs(tabs, '')
 
         return self.respuesta
+
+    
         
 
 
@@ -347,4 +359,4 @@ if __name__ == "__main__":
         print('Error introduzca un archivo')
     else:
         result = parser.parse(entrada)
-        print(result)
+        print(result)   
