@@ -134,8 +134,17 @@ def p_determinado(p):
                     | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
     '''
     if(len(p)<12):
+        p[2].type = '- iterador: ' + p[2].type 
+        p[4].type = "- inicio: " + p[4].type 
+        p[6].type = "- final: " + p[6].type 
+        p[8].type = '- iteracion: ' + p[8].type
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8]])
     else:   
+        p[2].type = '- iterador: ' + p[2].type 
+        p[4].type = "- inicio: " + p[4].type 
+        p[6].type = "- final: " + p[6].type
+        p[8].type = "- paso: " + p[8].type 
+        p[10].type = '- iteracion: ' + p[10].type 
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]])
 
 #--------------------------------------------------------------------------------------------#
@@ -264,9 +273,11 @@ def p_expresion_caracteres(p):
     }
     
     if p[1] == '#':
-        p[0] = Node('EXP_CARACTER', [p[2]], operadores[p[1]])
+        p[2].type = '- operador: ' + p[2].type
+        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]])
     else:
-        p[0] = Node('EXP_CARACTER', [p[1]], p[2])
+        p[1].type = '- operador: ' + p[1].type
+        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]])
 
 
 
@@ -288,11 +299,16 @@ def p_expresion_arreglos(p):
                         | expresion_arreglos TkCorcheteAbre expresion_aritmetica TkCorcheteCierra
     '''
     if len(p) == 4:
-        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], 'Concatenacion')
+        p[1].type = '- operador izquierdo: ' + p[1].type 
+        p[3].type = '- operador derecho: ' + p[3].type 
+        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], '- operacion: Concatenacion')
     elif len(p) == 3:
-        p[0] = Node('EXP_ARREGLOS', [p[2]], 'Shift')
+        p[2].type = '- operador: ' + p[2].type 
+        p[0] = Node('EXP_ARREGLOS', [p[2]], '- operacion: Shift')
     else:
-        p[0] = Node('EXP_ARREGLOS', [p[1]])
+        p[1].type = '- contenedor: ' + p[1].type
+        p[3].type = '- indexacion: ' + p[3].type
+        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]])
     
 
 def p_expresion_arreglos_literal(p):
