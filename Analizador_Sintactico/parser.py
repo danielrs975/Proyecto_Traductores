@@ -116,7 +116,8 @@ def p_entrada_salida(p):
     entrada_salida  : TkRead identificador TkPuntoYComa
                     | TkPrint expresion TkPuntoYComa
     '''
-    p[0] = Node('ENTRADA-SALIDA',[p[2]], p[1])
+    p[2].type = '- argumento: ' + p[2].type
+    p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1])
 
 def p_indeterminado(p):
     '''
