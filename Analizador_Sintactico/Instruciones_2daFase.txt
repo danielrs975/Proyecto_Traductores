@@ -22,7 +22,7 @@ Hacer las reglas de gramaticas para los siguientes tipos:
         --Expresiones relacionales----------------------------Hecho
 
 
-IMPORTANTE ARREGLAR EL FORMATO DE SALIDA
+IMPORTANTE ARREGLAR EL FORMATO DE SALIDA----------------------Hecho 
 
 
 revisar expresiones booleanas compuestas etc

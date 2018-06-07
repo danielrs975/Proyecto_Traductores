@@ -201,6 +201,7 @@ def p_expresion_aritmetica(p):
         p[3].type = '- operador derecho: ' + p[3].type
         p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2])
     else:
+        p[2].type = '- operador: ' + p[2].type 
         p[0] = Node('EXP_ARITMETICA', [p[2]], '- operacion: ' + p[1])    
 
 
