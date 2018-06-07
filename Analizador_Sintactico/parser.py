@@ -96,6 +96,9 @@ def p_condicional(p):
     '''
 
     if (len(p)>6):
+        p[2].type = '- guardia: ' + p[2].type
+        p[4].type = '- exito: ' + p[4].type
+        p[7].type = '- no exito: ' + p[7].type
         p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]])
     else:
         p[2].type = '- guardia: ' + p[2].type
@@ -222,11 +225,14 @@ def p_expresion_booleana(p):
         '\\/': 'Disyunción',
     }
     if p[1] == 'not':
-        p[0] = Node('EXP_BOOLEANA', [p[2]], p[1])
+        p[2].type = '- operador: ' + p[2].type 
+        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1])
     elif len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], operadores[p[2]])        
+        p[1].type = '- operador izquierdo: ' + p[1].type
+        p[3].type = '- operador derecho: ' + p[3].type
+        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]])        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
