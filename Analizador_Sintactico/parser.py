@@ -283,10 +283,12 @@ def p_expresion_booleana_literal_identificador(p):
 
 def p_expresion_caracteres(p):
     '''
-    expresion_caracteres    : expresion_caracteres TkSiguienteChar
+    expresion_caracteres    : identificador TkSiguienteChar
+                            | identificador TkAnteriorChar
+                            | TkValorAscii identificador
+                            | expresion_caracteres TkSiguienteChar
                             | expresion_caracteres TkAnteriorChar
                             | TkValorAscii expresion_caracteres
-
     '''
     operadores = {
         '++': 'Siguiente caracter',
