@@ -14,7 +14,10 @@ def p_programa(p):
     programa    : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
                 | TkBegin secuenciacion TkEnd
     '''
-    p[0] = p[4]
+    if len(p) > 4:
+        p[0] = p[4]
+    else:
+        p[0] = p[2]
 
 #------------------------ Este es la definicion del bloque de declaraciones ------------------#
 # Esta parte no hay que reportarla 
@@ -223,7 +226,7 @@ def p_expr_minus(p):
     expresion_aritmetica  : TkResta expresion_aritmetica %prec UMINUS
     '''
     p[0] = -p[2]
-    
+
 
 precedence = (
     ('nonassoc','TkMenorIgual','TkMayor', 'TkMayorIgual', 'TkIgual', 'TkDesigual'),
@@ -306,6 +309,7 @@ def p_expresion_caracteres(p):
 def p_expresion_caracteres_literal(p):
     '''
     expresion_caracteres    : literal
+                            | identificador
                             | TkParAbre expresion_caracteres TkParCierra
     '''
     if len(p) > 2:
@@ -367,9 +371,9 @@ def p_expresion_relacional(p):
 
 #-------------------------------------- Error ----------------------------------------------#
 
-def p_error(p):
-    print("Ha ocurrido un error de sintaxis. Abortando...")
-    sys.exit()
+# def p_error(p):
+#     print("Ha ocurrido un error de sintaxis. Abortando...")
+#     sys.exit()
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
