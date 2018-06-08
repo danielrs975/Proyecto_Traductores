@@ -1,3 +1,6 @@
+# Autores:
+#   - Daniel Rodriguez
+#   - Yuni Quintero
 # Se importar la libreria para hacer el parser 
 import ply.yacc as yacc 
 import sys
