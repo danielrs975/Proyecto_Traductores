@@ -2,6 +2,6 @@ begin
     begin
         p <- not p /\ not q \/ r;
 		x <- (2)+(3);
-	    y <- (p) /\ (true);
+	    y <- (not (p)) /\ true;
     end
 end

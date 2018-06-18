@@ -176,8 +176,12 @@ def p_determinado(p):
 def p_identificador(p):
     '''
     identificador   : TkId
+                    | TkParAbre identificador TkParCierra
     '''
-    p[0] = Node('VARIABLE',leaf="- identificador: " + p[1])
+    if p[1] == '(':
+        p[0] = p[2]
+    else:
+        p[0] = Node('VARIABLE',leaf="- identificador: " + p[1])
 
 def p_literal(p):
     '''
@@ -185,6 +189,7 @@ def p_literal(p):
             | TkTrue 
             | TkFalse 
             | TkCaracter
+            | TkParAbre literal TkParCierra
     '''
     if isinstance(p[1], int):
         p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]))
@@ -192,8 +197,10 @@ def p_literal(p):
         p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1])
     elif p[1] == 'false':
         p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1])
-    else:
+    elif isinstance(p[1], str) and p[1] != '(':
         p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1])
+    else:
+        p[0] = p[2]
 
 
 #--------------------------------------------------------------------------------------------#
