@@ -26,18 +26,17 @@ def p_programa(p):
 # Esta parte no hay que reportarla 
 def p_lista_declaraciones(p):
     '''
-    lista_declaraciones : TkVar lista_identificadores TkDosPuntos tipo 
+    lista_declaraciones : TkVar lista_identificadores TkDosPuntos tipo lista_declaraciones
+                        | TkVar lista_identificadores TkDosPuntos tipo 
     '''
 
 
 def p_lista_identificadores(p):
     '''
-    lista_identificadores   : lista_identificadores TkComa identificador
-    '''
-
-def p_lista_identificadores_identificador(p):
-    '''
-    lista_identificadores    : identificador
+    lista_identificadores   : identificador TkComa lista_identificadores
+                            | identificador TkAsignacion expresion_aritmetica TkComa lista_identificadores
+                            | identificador TkAsignacion expresion_aritmetica
+                            | identificador
                              | empty
     '''
 
@@ -46,7 +45,7 @@ def p_tipo(p):
     tipo    : TkInt
             | TkBool
             | TkChar 
-            | TkArray TkCorcheteAbre literal TkCorcheteCierra TkOf tipo 
+            | TkArray TkCorcheteAbre expresion_aritmetica TkCorcheteCierra TkOf tipo 
     '''
 # ---------------------------------------------------------------------------------------------#
 
@@ -128,8 +127,12 @@ def p_condicional(p):
 def p_alcance(p):
     '''
     alcance : TkWith lista_declaraciones TkBegin secuenciacion TkEnd
+            | TkBegin secuenciacion TkEnd
     '''
-    p[0] = p[4]
+    if len(p) > 4:
+        p[0] = p[4]
+    else:
+        p[0] = p[2]
 
 def p_entrada_salida(p):
     '''
@@ -215,6 +218,7 @@ def p_expresion_aritmetica(p):
                             | expresion_aritmetica TkMult expresion_aritmetica
                             | expresion_aritmetica TkMod expresion_aritmetica
                             | expresion_aritmetica TkDiv expresion_aritmetica
+                            | TkResta expresion_aritmetica
     '''
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
@@ -224,20 +228,7 @@ def p_expresion_aritmetica(p):
         p[2].type = '- operador: ' + p[2].type 
         p[0] = Node('EXP_ARITMETICA', [p[2]], '- operacion: ' + p[1])    
 
-def p_expr_minus(p):
-    '''
-    expresion_aritmetica  : TkResta expresion_aritmetica %prec UMINUS
-    '''
-    p[0] = -p[2]
 
-
-precedence = (
-    ('nonassoc','TkMenorIgual','TkMayor', 'TkMayorIgual', 'TkIgual', 'TkDesigual'),
-    ('left', 'TkSuma', 'TkResta', 'TkDisyuncion', 'TkSiguienteChar', 'TkConcatenacion'),
-    ('left', 'TkMod', 'TkMult', 'TkDiv', 'TkAnteriorChar', 'TkConjuncion', 'TkShift'),
-    ('left', 'TkValorAscii', 'TkNegacion', 'TkCorcheteAbre', 'TkCorcheteCierra'),
-    ('right', 'UMINUS')
-)
 
 def p_expresion_aritmetica_literal_identificador(p):
     '''
@@ -255,8 +246,7 @@ def p_expresion_booleana(p):
     '''
     expresion_booleana  : expresion_booleana TkConjuncion expresion_booleana
                         | expresion_booleana TkDisyuncion expresion_booleana
-                        | expresion_relacional TkConjuncion expresion_relacional
-                        | expresion_relacional TkDisyuncion expresion_relacional
+                        | TkParAbre expresion_booleana TkParCierra
                         | TkNegacion expresion_booleana
                         | TkNegacion expresion_relacional 
                         | expresion_relacional
@@ -270,6 +260,8 @@ def p_expresion_booleana(p):
         p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1])
     elif len(p) == 2:
         p[0] = p[1]
+    elif len(p) == 4 and p[1] == '(':
+        p[0] = p[2]
     else:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
@@ -279,13 +271,8 @@ def p_expresion_booleana_literal_identificador(p):
     '''
     expresion_booleana  : literal
                         | identificador
-                        | TkParAbre expresion_booleana TkParCierra
-                        | empty
     '''
-    if p[1] == '(':
-        p[0] = p[2]
-    else:
-        p[0] = p[1]
+    p[0] = p[1]
 
 def p_expresion_caracteres(p):
     '''
@@ -374,6 +361,13 @@ def p_expresion_relacional(p):
     p[3].type = '- operador derecho: ' + p[3].type 
     p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]])
 
+
+precedence = (
+    ('nonassoc','TkMenorIgual','TkMayor', 'TkMayorIgual', 'TkIgual', 'TkDesigual'),
+    ('left', 'TkSuma', 'TkResta', 'TkDisyuncion', 'TkSiguienteChar', 'TkConcatenacion'),
+    ('left', 'TkMod', 'TkMult', 'TkDiv', 'TkAnteriorChar', 'TkConjuncion', 'TkShift'),
+    ('left', 'TkValorAscii', 'TkNegacion', 'TkCorcheteAbre', 'TkCorcheteCierra'),
+)
 #-------------------------------------- Error ----------------------------------------------#
 
 # def p_error(p):
