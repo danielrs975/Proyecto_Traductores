@@ -7,7 +7,7 @@ import sys
 
 # Se importa los tokens del analizador lexicografico 
 from Analizador_Lexicografico.analizador import tokens, read_archive
-from tablas_simbolos import *
+from tablas_simbolos import tabla_simbolo
 
 # ----------------------- Construccion de la gramatica ------------------------- #
 
