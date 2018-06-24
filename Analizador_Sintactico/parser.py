@@ -7,6 +7,7 @@ import sys
 
 # Se importa los tokens del analizador lexicografico 
 from Analizador_Lexicografico.analizador import tokens, read_archive
+from tablas_simbolos import *
 
 # ----------------------- Construccion de la gramatica ------------------------- #
 
@@ -37,7 +38,7 @@ def p_lista_identificadores(p):
                             | identificador TkAsignacion expresion_aritmetica TkComa lista_identificadores
                             | identificador TkAsignacion expresion_aritmetica
                             | identificador
-                             | empty
+                            | empty
     '''
 
 def p_tipo(p):
@@ -426,7 +427,7 @@ class Node:
 
 
 
-#------------------------------------ Se termina las reglas de la gramatica para BasicTran--------------#
+#------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
 
 if __name__ == "__main__":
     parser = yacc.yacc()
