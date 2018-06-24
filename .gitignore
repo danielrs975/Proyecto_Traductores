@@ -16,3 +16,4 @@ Analizador_Sintactico/ejemplo.py
 Analizador_Sintactico/parsetab.py
 Analizador_Sintactico/prueba.txt
 Analizador_Sintactico/salida.txt
+Analizador_Sintactico/*.tar.gz
