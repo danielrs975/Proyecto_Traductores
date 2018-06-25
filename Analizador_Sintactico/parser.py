@@ -7,10 +7,11 @@ import sys
 
 # Se importa los tokens del analizador lexicografico 
 from Analizador_Lexicografico.analizador import tokens, read_archive
-from tablas_simbolos import tabla_simbolo
+from tablas_simbolos import Tabla_simbolo, Pila_tablas
 
 # ----------------------- Construccion de la gramatica ------------------------- #
 
+pila_de_tablas = Pila_tablas()
 # Partimos de lo mas general. Estructura del programa completo
 
 def p_programa(p):
@@ -25,22 +26,39 @@ def p_programa(p):
 
 #------------------------ Este es la definicion del bloque de declaraciones ------------------#
 # Esta parte no hay que reportarla 
+
+
 def p_lista_declaraciones(p):
     '''
     lista_declaraciones : TkVar lista_identificadores TkDosPuntos tipo lista_declaraciones
                         | TkVar lista_identificadores TkDosPuntos tipo 
     '''
+    if len(p) == 5:
+        p[0] = Tabla_simbolo()
+        for i in p[2]:
+            p[0].anadir_tabla(i, p[4])
+    else:
+        p[0] = p[5]
+        for i in p[2]:
+            p[0].anadir_tabla(i, p[4])
+
+    pila_de_tablas.push(p[0])
 
 
 
 def p_lista_identificadores(p):
     '''
     lista_identificadores   : identificador TkComa lista_identificadores
-                            | identificador TkAsignacion expresion_aritmetica TkComa lista_identificadores
-                            | identificador TkAsignacion expresion_aritmetica
+                            | identificador TkAsignacion expresion TkComa lista_identificadores
+                            | identificador TkAsignacion expresion
                             | identificador
-                            | empty
     '''
+    if len(p) == 2 or (len(p) == 4 and p[2] == '<-'):
+        p[0] = [p[1].nombre] 
+    elif len(p) == 6:
+        p[0] = p[5] + [p[1].nombre]
+    else:
+        p[0] = p[3] + [p[1].nombre]
 
 def p_tipo(p):
     '''
@@ -49,6 +67,7 @@ def p_tipo(p):
             | TkChar 
             | TkArray TkCorcheteAbre expresion_aritmetica TkCorcheteCierra TkOf tipo 
     '''
+    p[0] = p[1]
 # ---------------------------------------------------------------------------------------------#
 
 #--------------------------Funcion importante para manejar recursion--------------------------#
@@ -183,7 +202,7 @@ def p_identificador(p):
     if p[1] == '(':
         p[0] = p[2]
     else:
-        p[0] = Node('VARIABLE',leaf="- identificador: " + p[1])
+        p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
 
 def p_literal(p):
     '''
@@ -393,8 +412,18 @@ precedence = (
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
+class Node_ts:
+    def __init__(self,identificadores):
+        self.identificadores = identificadores
+
+    def anadir(self, identificador):
+        self.identificadores += identificador
+
+    def __str__(self):
+        for i in self.identificadores:
+            print(i)
 class Node:
-    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None):
         self.type = type
         if children:
             self.children = children 
@@ -402,6 +431,7 @@ class Node:
             self.children = []
         self.leaf = leaf
         self.valido = valido
+        self.nombre = nombre
         self.tabla_s = tabla_s
     
     respuesta = ''
@@ -450,4 +480,5 @@ if __name__ == "__main__":
         print('Error introduzca un archivo')
     else:
         result = parser.parse(entrada)
-        print(result)   
+        # print(result)   
+
