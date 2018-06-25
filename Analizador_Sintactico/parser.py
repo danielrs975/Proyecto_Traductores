@@ -86,6 +86,7 @@ def p_secuenciacion(p):
         p[0] = p[1]
     else:
         p[0] = Node('SECUENCIACION', [p[1], p[2]])
+    
 
 def p_secuenciacion2(p):
     '''
@@ -123,11 +124,13 @@ def p_asignacion(p):
     if p[2] == '<-':
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- expresion: ' + p[3].type
-        p[0] = Node('ASIGNACION',[p[1], p[3]])
+        es_valido = p[1].tipo_dato == p[3].tipo_dato
+        p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
     else:
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- expresion: ' + p[3].type
-        p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto')
+        es_valido = p[1].tipo_dato == 'int' and p[3].valido
+        p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
 
 def p_condicional(p):
     '''
@@ -139,11 +142,13 @@ def p_condicional(p):
         p[2].type = '- guardia: ' + p[2].type
         p[4].type = '- exito: ' + p[4].type
         p[7].type = '- no exito: ' + p[7].type
-        p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]])
+        es_valido = p[2].valido or p[2].tipo_dato == 'bool'
+        p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]], valido=es_valido)
     else:
         p[2].type = '- guardia: ' + p[2].type
         p[4].type = '- exito: ' + p[4].type
-        p[0] = Node('CONDICIONAL',[p[2],p[4]])
+        es_valido = p[2].valido or p[2].tipo_dato == 'bool'
+        p[0] = Node('CONDICIONAL',[p[2],p[4]], valido=es_valido)
 
 def p_alcance(p):
     '''
@@ -154,6 +159,7 @@ def p_alcance(p):
         p[0] = p[4]
     else:
         p[0] = p[2]
+    pila_de_tablas.pop()
 
 def p_entrada_salida(p):
     '''
@@ -202,7 +208,11 @@ def p_identificador(p):
     if p[1] == '(':
         p[0] = p[2]
     else:
-        p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
+        if len(pila_de_tablas.pila) > 0:
+            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1]))
+        else:
+            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
+
 
 def p_literal(p):
     '''
@@ -213,13 +223,13 @@ def p_literal(p):
             | TkParAbre literal TkParCierra
     '''
     if isinstance(p[1], int):
-        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]))
+        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int')
     elif p[1] == 'true':
-        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1])
+        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool')
     elif p[1] == 'false':
-        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1])
+        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool')
     elif isinstance(p[1], str) and p[1] != '(':
-        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1])
+        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char')
     else:
         p[0] = p[2]
 
@@ -251,13 +261,15 @@ def p_expresion_aritmetica(p):
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        es_valido = (p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[3].type == '- operador izquierdo: EXP_ARITMETICA' and p[3].valido)) and (p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido))
-        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido)
+        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[3].type == '- operador izquierdo: EXP_ARITMETICA' and p[3].valido) 
+        es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
+        es_valido = es_valido_izquierdo and es_valido_derecho
+        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido, tipo_dato='int')
     else:
         izquierdo = p[2]
         izquierdo.type = '- operador: ' + p[2].type 
         es_valido = p[2].type == 'LITERAL ENTERO' or (p[2].type == 'EXP_ARITMETICA' and p[2].valido)
-        p[0] = Node('EXP_ARITMETICA', [izquierdo], '- operacion: ' + p[1], valido=es_valido)    
+        p[0] = Node('EXP_ARITMETICA', [izquierdo], '- operacion: ' + p[1], valido=es_valido, tipo_dato='int')    
 
 
 
@@ -287,8 +299,8 @@ def p_expresion_booleana(p):
     }
     if p[1] == 'not':
         p[2].type = '- operador: ' + p[2].type 
-        es_valido = p[2].type == '- operador: LITERAL BOOLEANO' or (p[2].type == '- operador: EXP_BOOLEANA' and p[2].valido) or (p[2].type == '- operador: BIN_RELACIONAL' and p[2].valido)
-        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1], valido=es_valido)
+        es_valido = p[2].type == '- operador: LITERAL BOOLEANO' or (p[2].type == '- operador: VARIABLE' and p[2].tipo_dato == 'bool') or (p[2].type == '- operador: EXP_BOOLEANA' and p[2].valido) or (p[2].type == '- operador: BIN_RELACIONAL' and p[2].valido)
+        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1], valido=es_valido, tipo_dato='bool')
     elif len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4 and p[1] == '(':
@@ -296,10 +308,10 @@ def p_expresion_booleana(p):
     else:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL BOOLEANO' or (p[1].type == '- operador izquierdo: EXP_BOOLEANA' and p[1].valido) or (p[1].type == '- operador izquierdo: BIN_RELACIONAL' and p[1].valido)
-        es_valido_derecho = p[3].type == '- operador derecho: LITERAL BOOLEANO' or (p[3].type == '- operador derecho: EXP_BOOLEANA' and p[3].valido) or (p[3].type == '- operador derecho: BIN_RELACIONAL' and p[3].valido)
+        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL BOOLEANO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'bool') or (p[1].type == '- operador izquierdo: EXP_BOOLEANA' and p[1].valido) or (p[1].type == '- operador izquierdo: BIN_RELACIONAL' and p[1].valido)
+        es_valido_derecho = p[3].type == '- operador derecho: LITERAL BOOLEANO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'bool') or (p[3].type == '- operador derecho: EXP_BOOLEANA' and p[3].valido) or (p[3].type == '- operador derecho: BIN_RELACIONAL' and p[3].valido)
         es_valido = es_valido_izquierdo and es_valido_derecho
-        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido)        
+        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool')        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -322,12 +334,12 @@ def p_expresion_caracteres(p):
     
     if p[1] == '#':
         p[2].type = '- operador: ' + p[2].type
-        es_valido = p[2].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: LITERAL CARACTER' and p[2].valido)
-        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]], valido=es_valido)
+        es_valido = p[2].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: VARIABLE' and p[2].tipo_dato == 'char') or (p[2].type == '- operador: LITERAL CARACTER' and p[2].valido)
+        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]], valido=es_valido, tipo_dato= 'int')
     else:
         p[1].type = '- operador: ' + p[1].type
-        es_valido = p[1].type == '- operador: LITERAL CARACTER' or (p[1].type == '- operador: LITERAL CARACTER' and p[1].valido)
-        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]], valido=es_valido)
+        es_valido = p[1].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: VARIABLE' and p[2].tipe_dato == 'char') or (p[1].type == '- operador: LITERAL CARACTER' and p[1].valido)
+        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato= 'char')
 
 
 
@@ -392,10 +404,10 @@ def p_expresion_relacional(p):
     }
     p[1].type = '- operador izquierdo: ' + p[1].type
     p[3].type = '- operador derecho: ' + p[3].type 
-    es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido)
-    es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
+    es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido)
+    es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
     es_valido = es_valido_izquierdo and es_valido_derecho
-    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido)
+    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool')
 
 
 precedence = (
@@ -411,19 +423,8 @@ precedence = (
 #     sys.exit()
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
-
-class Node_ts:
-    def __init__(self,identificadores):
-        self.identificadores = identificadores
-
-    def anadir(self, identificador):
-        self.identificadores += identificador
-
-    def __str__(self):
-        for i in self.identificadores:
-            print(i)
 class Node:
-    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None):
         self.type = type
         if children:
             self.children = children 
@@ -433,6 +434,7 @@ class Node:
         self.valido = valido
         self.nombre = nombre
         self.tabla_s = tabla_s
+        self.tipo_dato = tipo_dato
     
     respuesta = ''
     tipo = ''
@@ -480,5 +482,5 @@ if __name__ == "__main__":
         print('Error introduzca un archivo')
     else:
         result = parser.parse(entrada)
-        # print(result)   
+        print(result)   
 
