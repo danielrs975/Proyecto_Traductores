@@ -1,12 +1,13 @@
+import sys
 # En este script se implementa la tabla de simbolos del lenguaje 
 # BasicTran
 
-class tabla_simbolo:
+class Tabla_simbolo:
     
     # Constructor de la tabla de simbolos
     # El argumento tabla superior contendra un objeto del tipo tabla de simbolo
     # y este sera justamente la tabla del scope inmediatamente superior
-    def __init__(self, tabla_superior):
+    def __init__(self, tabla_superior=None):
         self.tabla = {}
         self.tabla_anterior = tabla_superior
 
@@ -15,7 +16,8 @@ class tabla_simbolo:
         if not self.existe_tabla(id):
             self.tabla[id] = tipo
         else:
-            return "Error, la variable " + id + " ya ha sido declarada"
+            print("Error, la variable " + id + " ya ha sido declarada")
+            sys.exit()
 
     # Funcion que se encargara de verificar si el simbolo ya existe en la tabla
     def existe_tabla(self, id):
@@ -23,3 +25,20 @@ class tabla_simbolo:
             return False
         else:
             return True
+
+class Pila_tablas:
+
+    def __init__(self):
+        self.pila = []
+
+    def push(self, tabla):
+        self.pila.append(tabla)
+
+    def pop(self):
+        return self.pila.pop()
+    
+    def ver_tope(self):
+        return self.pila[len(self.pila) - 1]
+
+    def vacio(self):
+        return self.pila == []
