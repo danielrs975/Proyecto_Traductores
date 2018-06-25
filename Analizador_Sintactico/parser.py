@@ -67,7 +67,10 @@ def p_tipo(p):
             | TkChar 
             | TkArray TkCorcheteAbre expresion_aritmetica TkCorcheteCierra TkOf tipo 
     '''
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[1] + " " + p[6]
 # ---------------------------------------------------------------------------------------------#
 
 #--------------------------Funcion importante para manejar recursion--------------------------#
@@ -364,14 +367,17 @@ def p_expresion_arreglos(p):
     if len(p) == 4:
         p[1].type = '- operador izquierdo: ' + p[1].type 
         p[3].type = '- operador derecho: ' + p[3].type 
-        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], '- operacion: Concatenacion')
+        es_valido = p[1].type == '- operador izquierdo: VARIABLE' and p[3].type == '- operador derecho: VARIABLE' and p[1].tipo_dato == p[3].tipo_dato and p[1].tipo_dato[:5] == 'array' 
+        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], '- operacion: Concatenacion', valido=es_valido, tipo_dato=p[1].tipo_dato)
     elif len(p) == 3:
         p[2].type = '- operador: ' + p[2].type 
-        p[0] = Node('EXP_ARREGLOS', [p[2]], '- operacion: Shift')
+        es_valido = p[2].type == '- operador: VARIABLE' and p[2].tipo_dato[:5] == 'array'
+        p[0] = Node('EXP_ARREGLOS', [p[2]], '- operacion: Shift', valido=es_valido, tipo_dato=p[2].tipo_dato)
     else:
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- indexacion: ' + p[3].type
-        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]])
+        es_valido = p[1].type == '- contenedor: VARIABLE' and p[1].tipo_dato[:5] == 'array' and ((p[3].type == '- indexacion: EXP_ARITMETICA' and p[3].valido) or (p[3].type == '- indexacion: LITERAL ENTERO') or (p[3].type == '- indexacion: VARIABLE' and p[3].tipo_dato == 'int'))
+        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]], valido=es_valido, tipo_dato=p[1].tipo_dato)
     
 
 def p_expresion_arreglos_literal(p):
@@ -482,5 +488,6 @@ if __name__ == "__main__":
         print('Error introduzca un archivo')
     else:
         result = parser.parse(entrada)
-        print(result)   
+        print(result) 
+
 
