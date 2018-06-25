@@ -24,21 +24,30 @@ class Tabla_simbolo:
         if self.tabla.get(id) == None:
             return False
         else:
-            return True
+            return self.tabla[id]
 
 class Pila_tablas:
 
     def __init__(self):
         self.pila = []
+        self.head = 0
 
     def push(self, tabla):
         self.pila.append(tabla)
+        self.head = len(self.pila) - 1
 
     def pop(self):
         return self.pila.pop()
     
     def ver_tope(self):
         return self.pila[len(self.pila) - 1]
+
+    def esta_en_las_tablas(self, id):
+        if not self.vacio():
+            for i in range(len(self.pila) - 1, 0, -1):
+                if self.pila[i].existe_tabla(id) != False:
+                    return self.pila[i].existe_tabla(id)
+            return False
 
     def vacio(self):
         return self.pila == []
