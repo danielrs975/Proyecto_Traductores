@@ -32,6 +32,7 @@ def p_lista_declaraciones(p):
     '''
 
 
+
 def p_lista_identificadores(p):
     '''
     lista_identificadores   : identificador TkComa lista_identificadores
@@ -231,10 +232,13 @@ def p_expresion_aritmetica(p):
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2])
+        es_valido = (p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[3].type == '- operador izquierdo: EXP_ARITMETICA' and p[3].valido)) and (p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido))
+        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido)
     else:
-        p[2].type = '- operador: ' + p[2].type 
-        p[0] = Node('EXP_ARITMETICA', [p[2]], '- operacion: ' + p[1])    
+        izquierdo = p[2]
+        izquierdo.type = '- operador: ' + p[2].type 
+        es_valido = p[2].type == 'LITERAL ENTERO' or (p[2].type == 'EXP_ARITMETICA' and p[2].valido)
+        p[0] = Node('EXP_ARITMETICA', [izquierdo], '- operacion: ' + p[1], valido=es_valido)    
 
 
 
@@ -256,7 +260,6 @@ def p_expresion_booleana(p):
                         | expresion_booleana TkDisyuncion expresion_booleana
                         | TkParAbre expresion_booleana TkParCierra
                         | TkNegacion expresion_booleana
-                        | TkNegacion expresion_relacional 
                         | expresion_relacional
     '''
     operadores = {
@@ -265,7 +268,8 @@ def p_expresion_booleana(p):
     }
     if p[1] == 'not':
         p[2].type = '- operador: ' + p[2].type 
-        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1])
+        es_valido = p[2].type == '- operador: LITERAL BOOLEANO' or (p[2].type == '- operador: EXP_BOOLEANA' and p[2].valido) or (p[2].type == '- operador: BIN_RELACIONAL' and p[2].valido)
+        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1], valido=es_valido)
     elif len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4 and p[1] == '(':
@@ -273,7 +277,10 @@ def p_expresion_booleana(p):
     else:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]])        
+        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL BOOLEANO' or (p[1].type == '- operador izquierdo: EXP_BOOLEANA' and p[1].valido) or (p[1].type == '- operador izquierdo: BIN_RELACIONAL' and p[1].valido)
+        es_valido_derecho = p[3].type == '- operador derecho: LITERAL BOOLEANO' or (p[3].type == '- operador derecho: EXP_BOOLEANA' and p[3].valido) or (p[3].type == '- operador derecho: BIN_RELACIONAL' and p[3].valido)
+        es_valido = es_valido_izquierdo and es_valido_derecho
+        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido)        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -284,10 +291,7 @@ def p_expresion_booleana_literal_identificador(p):
 
 def p_expresion_caracteres(p):
     '''
-    expresion_caracteres    : identificador TkSiguienteChar
-                            | identificador TkAnteriorChar
-                            | TkValorAscii identificador
-                            | expresion_caracteres TkSiguienteChar
+    expresion_caracteres    : expresion_caracteres TkSiguienteChar
                             | expresion_caracteres TkAnteriorChar
                             | TkValorAscii expresion_caracteres
     '''
@@ -299,10 +303,12 @@ def p_expresion_caracteres(p):
     
     if p[1] == '#':
         p[2].type = '- operador: ' + p[2].type
-        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]])
+        es_valido = p[2].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: LITERAL CARACTER' and p[2].valido)
+        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]], valido=es_valido)
     else:
         p[1].type = '- operador: ' + p[1].type
-        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]])
+        es_valido = p[1].type == '- operador: LITERAL CARACTER' or (p[1].type == '- operador: LITERAL CARACTER' and p[1].valido)
+        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]], valido=es_valido)
 
 
 
@@ -367,7 +373,10 @@ def p_expresion_relacional(p):
     }
     p[1].type = '- operador izquierdo: ' + p[1].type
     p[3].type = '- operador derecho: ' + p[3].type 
-    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]])
+    es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido)
+    es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
+    es_valido = es_valido_izquierdo and es_valido_derecho
+    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido)
 
 
 precedence = (
@@ -385,13 +394,15 @@ precedence = (
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 
 class Node:
-    def __init__(self, type, children=None,leaf=None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None):
         self.type = type
         if children:
             self.children = children 
         else:
             self.children = []
         self.leaf = leaf
+        self.valido = valido
+        self.tabla_s = tabla_s
     
     respuesta = ''
     tipo = ''
@@ -401,6 +412,9 @@ class Node:
 
 
     def dfs(self, tabs, tipo):
+        if self.valido != None and not self.valido:
+            print('Ha ocurrido un error abortando')
+            sys.exit()
         if self.type != '':
             self.respuesta += self.type + '\n'
             tabs += '\t'
