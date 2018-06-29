@@ -132,16 +132,20 @@ def p_asignacion(p): #Nuevo
     asignacion  : identificador TkAsignacion expresion TkPuntoYComa
                 | identificador TkPunto expresion_aritmetica TkPuntoYComa
     '''
-    if p[2] == '<-':
-        p[1].type = '- contenedor: ' + p[1].type
-        p[3].type = '- expresion: ' + p[3].type
-        es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
-        p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
+    if pila_de_iteradores.esta_en_las_tablas(p[1].nombre)==False:
+        if p[2] == '<-':
+            p[1].type = '- contenedor: ' + p[1].type
+            p[3].type = '- expresion: ' + p[3].type
+            es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
+            p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
+        else:
+            p[1].type = '- contenedor: ' + p[1].type
+            p[3].type = '- expresion: ' + p[3].type
+            es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
+            p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
     else:
-        p[1].type = '- contenedor: ' + p[1].type
-        p[3].type = '- expresion: ' + p[3].type
-        es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
-        p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
+        print('Se esta alterando el valor del iterador: ' + p[1].nombre)
+        sys.exit()
 
 def p_condicional(p):
     '''
@@ -195,6 +199,10 @@ def p_determinado(p): #Nuevo
     determinado     : TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkStep literal TkHacer secuenciacion TkEnd
                     | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
     '''
+    p[0] = Tabla_simbolo()
+    p[0].anadir_tabla(p[2].nombre, 'int')
+    pila_de_iteradores = Pila_tablas()
+    pila_de_iteradores.push(p[0])
     if(len(p)<12):
         p[2].type = '- iterador: ' + p[2].type 
         p[4].type = "- inicio: " + p[4].type 
@@ -210,6 +218,7 @@ def p_determinado(p): #Nuevo
         p[10].type = '- iteracion: ' + p[10].type 
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]], valido=es_valido)
+    pila_de_iteradores.pop()
 
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#
