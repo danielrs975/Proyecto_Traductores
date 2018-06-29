@@ -138,12 +138,12 @@ def p_asignacion(p): #Nuevo
         if p[2] == '<-':
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
-            es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
+            es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
             p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
         else:
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
-            es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
+            es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
             p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
     else:
         print('Se esta alterando el valor del iterador: ' + p[1].nombre)
@@ -244,11 +244,9 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
     if p[1] == '(':
         p[0] = p[2]
     else:
-        if len(pila_de_tablas.pila) > 0:
+        if len(pila_de_tablas.pila) >= 0:
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1]))
-        else:
-            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
-        if p[0].tipo_dato == False:
+        if p[0].tipo_dato == False and len(pila_de_tablas.pila) > 0:
             print("Error, variable no declarada: " + p[0].nombre)
             sys.exit()
 
@@ -524,6 +522,12 @@ if __name__ == "__main__":
         print('Error introduzca un archivo')
     else:
         result = parser.parse(entrada)
-        print(result) 
+        print("-------------Arbol sintactico abstracto----------")
+        print(result)
+        print('--------------------------------------------------')
+        print("----------------Tablas de simbolos----------------")
+        for i in pila_de_tablas.pila:
+            print(i.tabla)
+
 
 

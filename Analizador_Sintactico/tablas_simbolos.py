@@ -37,7 +37,8 @@ class Pila_tablas:
         self.head = len(self.pila) - 1
 
     def pop(self):
-        return self.pila.pop()
+        if not self.vacio:
+            return self.pila.pop()
     
     def ver_tope(self):
         return self.pila[len(self.pila) - 1]
