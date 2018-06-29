@@ -244,11 +244,10 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
     if p[1] == '(':
         p[0] = p[2]
     else:
-        if len(pila_de_tablas.pila) >= 0:
+        if len(pila_de_tablas.pila) > 0:
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1]))
-        if p[0].tipo_dato == False and len(pila_de_tablas.pila) > 0:
-            print("Error, variable no declarada: " + p[0].nombre)
-            sys.exit()
+        else:
+            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
 
 
 def p_literal(p):
@@ -527,7 +526,7 @@ if __name__ == "__main__":
         print('--------------------------------------------------')
         print("----------------Tablas de simbolos----------------")
         for i in pila_de_tablas.pila:
-            print(i.tabla)
+            print(i.tabla)  
 
 
 

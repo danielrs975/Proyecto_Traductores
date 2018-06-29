@@ -1,5 +1,13 @@
 with
-    var contador, bar, bar : int
+    var contador, bar, i: int
 begin
-    bar <- 2 + 4*(2+23) ;
+    with 
+        var k: int
+    begin
+        if true ->
+            for i from 34 to 21 ->
+                contador <- 4;
+            end
+        end
+    end
 end
