@@ -28,7 +28,7 @@ def p_programa(p):
 # Esta parte no hay que reportarla 
 
 
-def p_lista_declaraciones(p):
+def p_lista_declaraciones(p): #Nuevo
     '''
     lista_declaraciones : TkVar lista_identificadores TkDosPuntos tipo lista_declaraciones
                         | TkVar lista_identificadores TkDosPuntos tipo 
@@ -36,11 +36,19 @@ def p_lista_declaraciones(p):
     if len(p) == 5:
         p[0] = Tabla_simbolo()
         for i in p[2]:
-            p[0].anadir_tabla(i, p[4])
+            if pila_de_tablas.esta_en_las_tablas(i)==False:
+                p[0].anadir_tabla(i, p[4])
+            else:
+                print('Ha ocurrido un error abortando')
+                sys.exit()
     else:
         p[0] = p[5]
         for i in p[2]:
-            p[0].anadir_tabla(i, p[4])
+            if !pila_de_tablas.esta_en_las_tablas(i)==False:
+                p[0].anadir_tabla(i, p[4])
+            else:
+                print('Ha ocurrido un error abortando')
+                sys.exit()
 
     pila_de_tablas.push(p[0])
 
@@ -119,7 +127,7 @@ def p_instruccion(p):
     p[0] = p[1]
 
 #------------------- Tipos de instrucciones --------------------------------------------------#
-def p_asignacion(p):
+def p_asignacion(p): #Nuevo
     '''
     asignacion  : identificador TkAsignacion expresion TkPuntoYComa
                 | identificador TkPunto expresion_aritmetica TkPuntoYComa
@@ -127,12 +135,12 @@ def p_asignacion(p):
     if p[2] == '<-':
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- expresion: ' + p[3].type
-        es_valido = p[1].tipo_dato == p[3].tipo_dato
+        es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
         p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
     else:
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- expresion: ' + p[3].type
-        es_valido = p[1].tipo_dato == 'int' and p[3].valido
+        es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False
         p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
 
 def p_condicional(p):
@@ -164,13 +172,14 @@ def p_alcance(p):
         p[0] = p[2]
     pila_de_tablas.pop()
 
-def p_entrada_salida(p):
+def p_entrada_salida(p): #Nuevo
     '''
     entrada_salida  : TkRead identificador TkPuntoYComa
                     | TkPrint expresion TkPuntoYComa
     '''
     p[2].type = '- argumento: ' + p[2].type
-    p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1])
+    es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
+    p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
 
 def p_indeterminado(p):
     '''
@@ -181,7 +190,7 @@ def p_indeterminado(p):
     p[4].type = '- iteracion: ' + p[4].type
     p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]])
 
-def p_determinado(p):
+def p_determinado(p): #Nuevo
     '''
     determinado     : TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkStep literal TkHacer secuenciacion TkEnd
                     | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
@@ -191,19 +200,21 @@ def p_determinado(p):
         p[4].type = "- inicio: " + p[4].type 
         p[6].type = "- final: " + p[6].type 
         p[8].type = '- iteracion: ' + p[8].type
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8]])
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8]], valido=es_valido)
     else:   
         p[2].type = '- iterador: ' + p[2].type 
         p[4].type = "- inicio: " + p[4].type 
         p[6].type = "- final: " + p[6].type
         p[8].type = "- paso: " + p[8].type 
         p[10].type = '- iteracion: ' + p[10].type 
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]])
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]], valido=es_valido)
 
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#
 
-def p_identificador(p):
+def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
     '''
     identificador   : TkId
                     | TkParAbre identificador TkParCierra
