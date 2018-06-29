@@ -12,6 +12,8 @@ from tablas_simbolos import Tabla_simbolo, Pila_tablas
 # ----------------------- Construccion de la gramatica ------------------------- #
 
 pila_de_tablas = Pila_tablas()
+pila_de_iteradores = Pila_tablas()
+
 # Partimos de lo mas general. Estructura del programa completo
 
 def p_programa(p):
@@ -181,9 +183,14 @@ def p_entrada_salida(p): #Nuevo
     entrada_salida  : TkRead identificador TkPuntoYComa
                     | TkPrint expresion TkPuntoYComa
     '''
-    p[2].type = '- argumento: ' + p[2].type
-    es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
-    p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
+    if p[1] == 'read':
+        p[2].type = '- argumento: ' + p[2].type
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False 
+        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
+    else:
+        p[2].type = '- argumento: ' + p[2].type
+        es_valido = p[2].valido
+        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
 
 def p_indeterminado(p):
     '''
@@ -196,30 +203,36 @@ def p_indeterminado(p):
 
 def p_determinado(p): #Nuevo
     '''
-    determinado     : TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkStep literal TkHacer secuenciacion TkEnd
-                    | TkFor identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
+    determinado     : TkFor identificador ve_identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkStep literal TkHacer secuenciacion TkEnd
+                    | TkFor identificador ve_identificador TkFrom expresion_aritmetica TkTo expresion_aritmetica TkHacer secuenciacion TkEnd
     '''
-    p[0] = Tabla_simbolo()
-    p[0].anadir_tabla(p[2].nombre, 'int')
-    pila_de_iteradores = Pila_tablas()
-    pila_de_iteradores.push(p[0])
+    
     if(len(p)<12):
         p[2].type = '- iterador: ' + p[2].type 
-        p[4].type = "- inicio: " + p[4].type 
-        p[6].type = "- final: " + p[6].type 
-        p[8].type = '- iteracion: ' + p[8].type
-        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8]], valido=es_valido)
-    else:   
+        p[5].type = "- inicio: " + p[5].type 
+        p[7].type = "- final: " + p[7].type 
+        p[9].type = '- iteracion: ' + p[9].type
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9]], valido=es_valido)
+    else:
         p[2].type = '- iterador: ' + p[2].type 
-        p[4].type = "- inicio: " + p[4].type 
-        p[6].type = "- final: " + p[6].type
-        p[8].type = "- paso: " + p[8].type 
-        p[10].type = '- iteracion: ' + p[10].type 
-        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[4], p[6], p[8], p[10]], valido=es_valido)
+        p[5].type = "- inicio: " + p[5].type 
+        p[7].type = "- final: " + p[7].type
+        p[9].type = "- paso: " + p[9].type 
+        p[11].type = '- iteracion: ' + p[10].type 
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido)
     pila_de_iteradores.pop()
 
+# Esta funcion crea una pila donde se guarda el iterador que es usado 
+# en el for
+def p_ve_identificador(p):
+    '''
+    ve_identificador    :
+    '''
+    tabla_auxiliar = Tabla_simbolo()
+    tabla_auxiliar.anadir_tabla(p[-1].nombre, 'int')
+    pila_de_iteradores.push(tabla_auxiliar)
 #--------------------------------------------------------------------------------------------#
 #----------------------------Literales e identificadores-------------------------------------#
 
@@ -235,6 +248,9 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1]))
         else:
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
+        if p[0].tipo_dato == False:
+            print("Error, variable no declarada: " + p[0].nombre)
+            sys.exit()
 
 
 def p_literal(p):

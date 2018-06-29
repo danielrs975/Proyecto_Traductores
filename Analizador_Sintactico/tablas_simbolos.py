@@ -48,6 +48,7 @@ class Pila_tablas:
                 if self.pila[i].existe_tabla(id) != False:
                     return self.pila[i].existe_tabla(id)
             return False
+        return False
 
     def vacio(self):
         return self.pila == []
