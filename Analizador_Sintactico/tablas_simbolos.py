@@ -44,7 +44,7 @@ class Pila_tablas:
 
     def esta_en_las_tablas(self, id):
         if not self.vacio():
-            for i in range(len(self.pila) - 1, 0, -1):
+            for i in range(len(self.pila) - 1, -1, -1):
                 if self.pila[i].existe_tabla(id) != False:
                     return self.pila[i].existe_tabla(id)
             return False

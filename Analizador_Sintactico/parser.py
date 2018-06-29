@@ -36,18 +36,18 @@ def p_lista_declaraciones(p): #Nuevo
     if len(p) == 5:
         p[0] = Tabla_simbolo()
         for i in p[2]:
-            if pila_de_tablas.esta_en_las_tablas(i)==False:
+            if p[0].existe_tabla(i) == False:
                 p[0].anadir_tabla(i, p[4])
             else:
-                print('Ha ocurrido un error abortando')
+                print('Se esta declarando una variable ya declarada: ' + i)
                 sys.exit()
     else:
         p[0] = p[5]
         for i in p[2]:
-            if !pila_de_tablas.esta_en_las_tablas(i)==False:
+            if p[0].existe_tabla(i) == False:
                 p[0].anadir_tabla(i, p[4])
             else:
-                print('Ha ocurrido un error abortando')
+                print('Se esta declarando una variable ya declarada: ' + i)
                 sys.exit()
 
     pila_de_tablas.push(p[0])
