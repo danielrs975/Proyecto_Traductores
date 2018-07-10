@@ -12,12 +12,19 @@ class Tabla_simbolo:
         self.tabla_anterior = tabla_superior
 
     # Funcion que anadira nuevos simbolos a la tabla 
-    def anadir_tabla(self, id,  tipo):
+    def anadir_tabla(self, id,  tipo, valor=None):
         if not self.existe_tabla(id):
-            self.tabla[id] = tipo
+            self.tabla[id] = [tipo, valor]
         else:
             print("Error, la variable " + id + " ya ha sido declarada")
             sys.exit()
+
+    '''# Funcion que modifica el valor del simbolo
+    def modificar_tabla(self, id, valor):
+        if not self.existe_tabla(id):
+            print("Error, la variable "+ id + " no ha sido declarada")
+        else:
+            self.tabla[id][1] = valor'''
 
     # Funcion que se encargara de verificar si el simbolo ya existe en la tabla
     def existe_tabla(self, id):
@@ -50,6 +57,13 @@ class Pila_tablas:
                     return self.pila[i].existe_tabla(id)
             return False
         return False
+
+    def modificar_valor_pila(self, id, valor):
+        x = self.esta_en_las_tablas(id)
+        if not x:
+            print("Error, variable " + id + " no declarada")
+        x[1] = valor
+            
 
     def vacio(self):
         return self.pila == []
