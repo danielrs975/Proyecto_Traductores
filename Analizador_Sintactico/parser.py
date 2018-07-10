@@ -220,7 +220,9 @@ def p_determinado(p): #Nuevo
         p[5].type = "- inicio: " + p[5].type 
         p[7].type = "- final: " + p[7].type
         p[9].type = "- paso: " + p[9].type 
-        p[11].type = '- iteracion: ' + p[11].type 
+        p[11].type = '- iteracion: ' + p[11
+        
+        ].type 
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido)
     pila_de_iteradores.pop()
