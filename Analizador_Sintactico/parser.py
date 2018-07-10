@@ -140,11 +140,14 @@ def p_asignacion(p): #Nuevo
             p[3].type = '- expresion: ' + p[3].type
             es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
             p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
+            pila_de_tablas.modificar_valor_pila(p[1].nombre, p[3].nodo_valor)
+            
         else:
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
             es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
             p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
+            pila_de_tablas.modificar_valor_pila(p[1].nombre, p[3].nodo_valor)
     else:
         print('Se esta alterando el valor del iterador: ' + p[1].nombre)
         sys.exit()
@@ -213,16 +216,18 @@ def p_determinado(p): #Nuevo
         p[5].type = "- inicio: " + p[5].type 
         p[7].type = "- final: " + p[7].type 
         p[9].type = '- iteracion: ' + p[9].type
-        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int' and p[9].tipo_dato == 'int'
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9]], valido=es_valido)
+        pila_de_tablas.modificar_valor_pila(p[2].nombre, p[5].nodo_valor)
     else:
         p[2].type = '- iterador: ' + p[2].type 
         p[5].type = "- inicio: " + p[5].type 
         p[7].type = "- final: " + p[7].type
         p[9].type = "- paso: " + p[9].type 
         p[11].type = '- iteracion: ' + p[11].type 
-        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
+        es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int' and p[9].tipo_dato == 'int'
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido)
+        pila_de_tablas.modificar_valor_pila(p[2].nombre, p[5].nodo_valor)
     pila_de_iteradores.pop()
 
 # Esta funcion crea una pila donde se guarda el iterador que es usado 
@@ -246,7 +251,7 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
         p[0] = p[2]
     else:
         if len(pila_de_tablas.pila) > 0:
-            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1]))
+            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1])[0])
         else:
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
 
@@ -260,13 +265,13 @@ def p_literal(p):
             | TkParAbre literal TkParCierra
     '''
     if isinstance(p[1], int):
-        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int')
+        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int', nodo_valor=p[1])
     elif p[1] == 'true':
-        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool')
+        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool', nodo_valor=p[1])
     elif p[1] == 'false':
-        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool')
+        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool', nodo_valor = p[1])
     elif isinstance(p[1], str) and p[1] != '(':
-        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char')
+        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char', nodo_valor=p[2])
     else:
         p[0] = p[2]
 
@@ -464,7 +469,7 @@ precedence = (
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 class Node:
-    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None, nodo_valor = None):
         self.type = type
         if children:
             self.children = children 
@@ -475,6 +480,7 @@ class Node:
         self.nombre = nombre
         self.tabla_s = tabla_s
         self.tipo_dato = tipo_dato
+        self.nodo_valor = nodo_valor
     
     respuesta = ''
     tipo = ''
