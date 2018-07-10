@@ -199,7 +199,8 @@ def p_indeterminado(p):
     '''
     p[2].type = '- guardia: ' + p[2].type
     p[4].type = '- iteracion: ' + p[4].type
-    p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]])
+    es_valido = p[2].valido and p[2].tipo_dato == 'bool'
+    p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]], valido=es_valido)
 
 def p_determinado(p): #Nuevo
     '''
