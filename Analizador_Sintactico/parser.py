@@ -98,7 +98,7 @@ def p_secuenciacion(p):
     if p[2] == None:
         p[0] = p[1]
     else:
-        p[0] = Node('SECUENCIACION', [p[1], p[2]])
+        p[0] = Node('SECUENCIACION', [p[1], p[2]], tipo_expr='SECUENCIACION')
     
 
 def p_secuenciacion2(p):
@@ -139,14 +139,12 @@ def p_asignacion(p): #Nuevo
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
             es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
-            p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
-            pila_de_tablas.modificar_valor_pila(p[1].nombre, p[3].nodo_valor)
+            p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido, tipo_expr='ASIGNACION')
         else:
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
             es_valido = p[1].tipo_dato == 'int' and p[3].valido and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
-            p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido)
-            pila_de_tablas.modificar_valor_pila(p[1].nombre, p[3].nodo_valor)
+            p[0] = Node('ASIGNACION',[p[1], p[3]], '- operacion: punto', valido=es_valido, tipo_expr='ASIGNACION')
     else:
         print('Se esta alterando el valor del iterador: ' + p[1].nombre)
         sys.exit()
@@ -162,12 +160,12 @@ def p_condicional(p):
         p[4].type = '- exito: ' + p[4].type
         p[7].type = '- no exito: ' + p[7].type
         es_valido = p[2].valido or p[2].tipo_dato == 'bool'
-        p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]], valido=es_valido)
+        p[0] = Node('CONDICIONAL',[p[2],p[4],p[7]], valido=es_valido, tipo_expr='CONDICIONAL')
     else:
         p[2].type = '- guardia: ' + p[2].type
         p[4].type = '- exito: ' + p[4].type
         es_valido = p[2].valido or p[2].tipo_dato == 'bool'
-        p[0] = Node('CONDICIONAL',[p[2],p[4]], valido=es_valido)
+        p[0] = Node('CONDICIONAL',[p[2],p[4]], valido=es_valido, tipo_expr='CONDICIONAL')
 
 def p_alcance(p):
     '''
@@ -188,11 +186,11 @@ def p_entrada_salida(p): #Nuevo
     if p[1] == 'read':
         p[2].type = '- argumento: ' + p[2].type
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False 
-        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
+        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido, tipo_oper=p[1], tipo_expr='ENTRADA-SALIDA')
     else:
         p[2].type = '- argumento: ' + p[2].type
         es_valido = p[2].valido
-        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido)
+        p[0] = Node('ENTRADA-SALIDA',[p[2]], '- operador: ' + p[1], valido=es_valido, tipo_oper=p[1], tipo_expr='ENTRADA-SALIDA')
 
 def p_indeterminado(p):
     '''
@@ -217,7 +215,6 @@ def p_determinado(p): #Nuevo
         p[9].type = '- iteracion: ' + p[9].type
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9]], valido=es_valido)
-        pila_de_tablas.modificar_valor_pila(p[2].nombre, p[5].nodo_valor)
     else:
         p[2].type = '- iterador: ' + p[2].type 
         p[5].type = "- inicio: " + p[5].type 
@@ -226,7 +223,6 @@ def p_determinado(p): #Nuevo
         p[11].type = '- iteracion: ' + p[11].type 
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int' and p[9].tipo_dato == 'int'
         p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido)
-        pila_de_tablas.modificar_valor_pila(p[2].nombre, p[5].nodo_valor)
     pila_de_iteradores.pop()
 
 # Esta funcion crea una pila donde se guarda el iterador que es usado 
@@ -411,16 +407,16 @@ def p_expresion_arreglos(p):
         p[1].type = '- operador izquierdo: ' + p[1].type 
         p[3].type = '- operador derecho: ' + p[3].type 
         es_valido = p[1].type == '- operador izquierdo: VARIABLE' and p[3].type == '- operador derecho: VARIABLE' and p[1].tipo_dato == p[3].tipo_dato and p[1].tipo_dato[:5] == 'array' 
-        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], '- operacion: Concatenacion', valido=es_valido, tipo_dato=p[1].tipo_dato)
+        p[0] = Node('EXP_ARREGLOS', [p[1], p[3]], '- operacion: Concatenacion', valido=es_valido, tipo_dato=p[1].tipo_dato, tipo_expr='EXP_ARREGLOS', tipo_oper='Concatenacion')
     elif len(p) == 3:
         p[2].type = '- operador: ' + p[2].type 
         es_valido = p[2].type == '- operador: VARIABLE' and p[2].tipo_dato[:5] == 'array'
-        p[0] = Node('EXP_ARREGLOS', [p[2]], '- operacion: Shift', valido=es_valido, tipo_dato=p[2].tipo_dato)
+        p[0] = Node('EXP_ARREGLOS', [p[2]], '- operacion: Shift', valido=es_valido, tipo_dato=p[2].tipo_dato, tipo_expr='EXP_ARREGLOS', tipo_oper='Shift')
     else:
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- indexacion: ' + p[3].type
         es_valido = p[1].type == '- contenedor: VARIABLE' and p[1].tipo_dato[:5] == 'array' and ((p[3].type == '- indexacion: EXP_ARITMETICA' and p[3].valido) or (p[3].type == '- indexacion: LITERAL ENTERO') or (p[3].type == '- indexacion: VARIABLE' and p[3].tipo_dato == 'int'))
-        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]], valido=es_valido, tipo_dato=p[1].tipo_dato)
+        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]], valido=es_valido, tipo_dato=p[1].tipo_dato, tipo_expr='EXP_ARREGLOS', tipo_oper='indexacion')
     
 
 def p_expresion_arreglos_literal(p):
@@ -518,15 +514,38 @@ class Node:
     # Funcion que evalua arbol sintactico abstracto 
     def evaluar_arbol(self):
         # Ejecucion de las instrucciones 
-        if self.type == "SECUENCIACION":
+        if self.tipo_expr == "SECUENCIACION":
             for child in self.children:
                 child.evaluar_arbol()
-        elif self.type == "ASIGNACION":
+        elif self.tipo_expr == "ASIGNACION":
             # Lado izquierdo de la asignacion 
             variable = self.children[0].nombre
             # Lado derecho de la asignacion es una expresion guardamos el valor de dicha expresion
             valor = self.children[1].evaluar_arbol()
             pila_de_tablas.modificar_valor_pila(variable, valor)
+        elif self.tipo_expr == "ENTRADA-SALIDA":
+            # Primero se ve que operacion se esta haciendo
+            if self.tipo_oper == 'print':
+                print(self.children[0].evaluar_arbol())
+            if self.tipo_oper == 'read':
+                # Aqui hay que verficar que el tipo de la variable y el que esta 
+                # ingresando el usuario sean los mismos 
+                entrada = input()
+                variable = self.children[0].nombre
+                pila_de_tablas.modificar_valor_pila(variable,entrada)
+        elif self.tipo_expr == "CONDICIONAL":
+            # Primero ejecutamos los if que no tienen else 
+            if len(self.children) == 2:
+                se_cumple_guardia = self.children[0].evaluar_arbol()
+                if se_cumple_guardia:
+                    self.children[1].evaluar_arbol()
+            else:
+                se_cumple_guardia = self.children[0].evaluar_arbol()
+                if se_cumple_guardia:
+                    self.children[1].evaluar_arbol()
+                else:
+                    self.children[2].evaluar_arbol()    
+        # -------------------------------------------------------------------------------------------
 
         # Evaluacion de las expresiones
         es_literal = self.tipo_expr == "LITERAL CARACTER" or self.tipo_expr == "LITERAL ENTERO" or self.tipo_expr == "LITERAL BOOLEANO" 
@@ -594,6 +613,12 @@ class Node:
             if self.tipo_oper == '#':
                 caracter = self.children[0].evaluar_arbol()[1]
                 return ord(caracter)
+
+        # if self.tipo_expr == 'EXP_ARREGLOS':
+        #     # Se ve que tipo de operacion es y se ejecuta
+        #     if self.tipo_oper == 'Concatenacion':
+
+        
 #------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
 
 if __name__ == "__main__":
