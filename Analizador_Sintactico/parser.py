@@ -456,7 +456,7 @@ def p_expresion_relacional(p):
     es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido)
     es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
     es_valido = es_valido_izquierdo and es_valido_derecho
-    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool')
+    p[0] = Node('BIN_RELACIONAL', [p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool', tipo_expr="BIN_RELACIONAL", tipo_oper=p[2])
 
 
 precedence = (
@@ -566,6 +566,21 @@ class Node:
             if self.tipo_oper == 'Disyunción':
                 # Lado derecho operado con lado izquierdo
                 return self.children[0].evaluar_arbol() or self.children[1].evaluar_arbol()
+
+        if self.tipo_expr == 'BIN_RELACIONAL':
+            # Se ve que tipo de operacion es y se realiza la operacion
+            if self.tipo_oper == '>':
+                return self.children[0].evaluar_arbol() > self.children[1].evaluar_arbol()
+            if self.tipo_oper == '<':
+                return self.children[0].evaluar_arbol() < self.children[1].evaluar_arbol()
+            if self.tipo_oper == '<=':
+                return self.children[0].evaluar_arbol() <= self.children[1].evaluar_arbol()
+            if self.tipo_oper == '>=':
+                return self.children[0].evaluar_arbol() >= self.children[1].evaluar_arbol()
+            if self.tipo_oper == '=':
+                return self.children[0].evaluar_arbol() == self.children[1].evaluar_arbol()
+            if self.tipo_oper == '/=':
+                return self.children[0].evaluar_arbol() != self.children[1].evaluar_arbol()
 
 
 
