@@ -380,12 +380,12 @@ def p_expresion_caracteres(p):
     
     if p[1] == '#':
         p[2].type = '- operador: ' + p[2].type
-        es_valido = p[2].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: VARIABLE' and p[2].tipo_dato == 'char') or (p[2].type == '- operador: LITERAL CARACTER' and p[2].valido)
-        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]], valido=es_valido, tipo_dato= 'int')
+        es_valido = p[2].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: VARIABLE' and p[2].tipo_dato == 'char') or (p[2].type == '- operador: EXP_CARACTER' and p[2].valido)
+        p[0] = Node('EXP_CARACTER', [p[2]], '- operacion: ' + operadores[p[1]], valido=es_valido, tipo_dato= 'int', tipo_expr='EXP_CARACTER', tipo_oper=p[1])
     else:
         p[1].type = '- operador: ' + p[1].type
-        es_valido = p[1].type == '- operador: LITERAL CARACTER' or (p[2].type == '- operador: VARIABLE' and p[2].tipe_dato == 'char') or (p[1].type == '- operador: LITERAL CARACTER' and p[1].valido)
-        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato= 'char')
+        es_valido = p[1].type == '- operador: LITERAL CARACTER' or (p[1].type == '- operador: VARIABLE' and p[1].tipo_dato == 'char') or (p[1].type == '- operador: EXP_CARACTER' and p[1].valido)
+        p[0] = Node('EXP_CARACTER', [p[1]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato= 'char', tipo_expr='EXP_CARACTER', tipo_oper=p[2])
 
 
 
@@ -467,9 +467,9 @@ precedence = (
 )
 #-------------------------------------- Error ----------------------------------------------#
 
-# def p_error(p):
-#     print("Ha ocurrido un error de sintaxis. Abortando...")
-#     sys.exit()
+def p_error(p):
+    print("Ha ocurrido un error de sintaxis. Abortando...")
+    sys.exit()
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 class Node:
@@ -582,8 +582,18 @@ class Node:
             if self.tipo_oper == '/=':
                 return self.children[0].evaluar_arbol() != self.children[1].evaluar_arbol()
 
-
-
+        if self.tipo_expr == 'EXP_CARACTER':
+            # Se ve que tipo de operacion es y se ejecuta
+            if self.tipo_oper == '++':
+                # Se obtiene el caracter 
+                caracter = self.children[0].evaluar_arbol()[1]
+                return "'" + chr(ord(caracter) + 1) + "'"
+            if self.tipo_oper == '--':
+                caracter = self.children[0].evaluar_arbol()[1]
+                return "'" + chr(ord(caracter) - 1) + "'"
+            if self.tipo_oper == '#':
+                caracter = self.children[0].evaluar_arbol()[1]
+                return ord(caracter)
 #------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
 
 if __name__ == "__main__":
