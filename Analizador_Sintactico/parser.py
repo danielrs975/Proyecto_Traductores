@@ -200,7 +200,7 @@ def p_indeterminado(p):
     p[2].type = '- guardia: ' + p[2].type
     p[4].type = '- iteracion: ' + p[4].type
     es_valido = p[2].valido and p[2].tipo_dato == 'bool'
-    p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]], valido=es_valido)
+    p[0] = Node('ITERACION INDETERMINADA', [p[2], p[4]], valido=es_valido, tipo_expr='ITERACION INDETERMINADA')
 
 def p_determinado(p): #Nuevo
     '''
@@ -214,7 +214,7 @@ def p_determinado(p): #Nuevo
         p[7].type = "- final: " + p[7].type 
         p[9].type = '- iteracion: ' + p[9].type
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int'
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9]], valido=es_valido)
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9]], valido=es_valido, tipo_expr='ITERACION DETERMINADA')
     else:
         p[2].type = '- iterador: ' + p[2].type 
         p[5].type = "- inicio: " + p[5].type 
@@ -222,7 +222,7 @@ def p_determinado(p): #Nuevo
         p[9].type = "- paso: " + p[9].type 
         p[11].type = '- iteracion: ' + p[11].type 
         es_valido = pila_de_tablas.esta_en_las_tablas(p[2].nombre)!=False and p[2].tipo_dato == 'int' and p[9].tipo_dato == 'int'
-        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido)
+        p[0] = Node('ITERACION DETERMINADA', [p[2], p[5], p[7], p[9], p[11]], valido=es_valido, tipo_expr='ITERACION DETERMINADA')
     pila_de_iteradores.pop()
 
 # Esta funcion crea una pila donde se guarda el iterador que es usado 
@@ -545,6 +545,30 @@ class Node:
                     self.children[1].evaluar_arbol()
                 else:
                     self.children[2].evaluar_arbol()    
+        elif self.tipo_expr == "ITERACION INDETERMINADA":
+            #Guardamos valor de la guardia
+            se_cumple_guardia = self.children[0].evaluar_arbol()
+            while se_cumple_guardia:
+                self.children[1].evaluar_arbol()
+                se_cumple_guardia = self.children[0].evaluar_arbol()
+        elif self.tipo_expr == "ITERACION DETERMINADA":
+            #for sin token step
+            if len(self.children) == 4:
+                iterador = self.children[0].nombre
+                from_ = self.children[1].evaluar_arbol()
+                to_ = self.children[2].evaluar_arbol()
+                for i in range(from_, to_):
+                    pila_de_tablas.modificar_valor_pila(iterador,i)
+                    self.children[3].evaluar_arbol()
+            else:
+                iterador = self.children[0].nombre
+                from_ = self.children[1].evaluar_arbol()
+                to_ = self.children[2].evaluar_arbol()
+                step_ = self.children[3].evaluar_arbol()
+                for i in range(from_, to_, step_):
+                    pila_de_tablas.modificar_valor_pila(iterador,i) 
+                    self.children[4].evaluar_arbol()
+        
         # -------------------------------------------------------------------------------------------
 
         # Evaluacion de las expresiones
