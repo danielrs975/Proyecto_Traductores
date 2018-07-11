@@ -62,6 +62,7 @@ class Pila_tablas:
         x = self.esta_en_las_tablas(id)
         if not x:
             print("Error, variable " + id + " no declarada")
+            sys.exit()
         x[1] = valor
             
 

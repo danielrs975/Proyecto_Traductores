@@ -141,7 +141,6 @@ def p_asignacion(p): #Nuevo
             es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
             p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido)
             pila_de_tablas.modificar_valor_pila(p[1].nombre, p[3].nodo_valor)
-            
         else:
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
@@ -251,9 +250,13 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
         p[0] = p[2]
     else:
         if len(pila_de_tablas.pila) > 0:
-            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1])[0])
+            
+            if pila_de_tablas.esta_en_las_tablas(p[1])==False:
+                p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=False, tipo_expr='VARIABLE')
+            else:
+                 p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1])[0], tipo_expr='VARIABLE')
         else:
-            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1])
+            p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_expr='VARIABLE')
 
 
 def p_literal(p):
@@ -265,13 +268,13 @@ def p_literal(p):
             | TkParAbre literal TkParCierra
     '''
     if isinstance(p[1], int):
-        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int', nodo_valor=p[1])
+        p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int', nodo_valor=p[1], tipo_expr='LITERAL ENTERO')
     elif p[1] == 'true':
-        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool', nodo_valor=p[1])
+        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool', nodo_valor=p[1], tipo_expr='LITERAL BOOLEANO')
     elif p[1] == 'false':
-        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool', nodo_valor = p[1])
+        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool', nodo_valor = p[1], tipo_expr='LITERAL BOOLEANO')
     elif isinstance(p[1], str) and p[1] != '(':
-        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char', nodo_valor=p[2])
+        p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char', nodo_valor=p[1], tipo_expr='LITERAL CARACTER')
     else:
         p[0] = p[2]
 
@@ -303,15 +306,16 @@ def p_expresion_aritmetica(p):
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[3].type == '- operador izquierdo: EXP_ARITMETICA' and p[3].valido) 
+        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido) 
         es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
         es_valido = es_valido_izquierdo and es_valido_derecho
-        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido, tipo_dato='int')
+      
+        p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido, tipo_dato='int', tipo_expr="EXP_ARITMETICA", tipo_oper=p[2])
     else:
         izquierdo = p[2]
         izquierdo.type = '- operador: ' + p[2].type 
-        es_valido = p[2].type == 'LITERAL ENTERO' or (p[2].type == 'EXP_ARITMETICA' and p[2].valido)
-        p[0] = Node('EXP_ARITMETICA', [izquierdo], '- operacion: ' + p[1], valido=es_valido, tipo_dato='int')    
+        es_valido = p[2].type == '- operador: LITERAL ENTERO' or (p[2].type == 'EXP_ARITMETICA' and p[2].valido)
+        p[0] = Node('EXP_ARITMETICA', [izquierdo], '- operacion: ' + p[1], valido=es_valido, tipo_dato='int', tipo_expr='EXP_ARITMETICA', tipo_oper='menos_unario')    
 
 
 
@@ -469,7 +473,7 @@ precedence = (
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 class Node:
-    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None, nodo_valor = None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None, nodo_valor = None, tipo_expr=None, tipo_oper=None):
         self.type = type
         if children:
             self.children = children 
@@ -481,7 +485,8 @@ class Node:
         self.tabla_s = tabla_s
         self.tipo_dato = tipo_dato
         self.nodo_valor = nodo_valor
-    
+        self.tipo_expr = tipo_expr
+        self.tipo_oper = tipo_oper
     respuesta = ''
     tipo = ''
 
@@ -508,14 +513,49 @@ class Node:
                     self.respuesta += tabs + child.dfs(tabs, '')
                 else:
                     self.respuesta += child.dfs(tabs, '')
-
-                
-
-
         return self.respuesta
 
-    
+    # Funcion que evalua arbol sintactico abstracto 
+    def evaluar_arbol(self):
+        # Ejecucion de las instrucciones 
+        if self.type == "SECUENCIACION":
+            for child in self.children:
+                child.evaluar_arbol()
+        elif self.type == "ASIGNACION":
+            # Lado izquierdo de la asignacion 
+            variable = self.children[0].nombre
+            # Lado derecho de la asignacion es una expresion guardamos el valor de dicha expresion
+            valor = self.children[1].evaluar_arbol()
+            pila_de_tablas.modificar_valor_pila(variable, valor)
+
+        # Evaluacion de las expresiones
+        es_literal = self.tipo_expr == "LITERAL CARACTER" or self.tipo_expr == "LITERAL ENTERO" or self.tipo_expr == "LITERAL BOOLEANO" 
+        es_variable = self.tipo_expr == "VARIABLE"
+        if es_literal:
+            return self.nodo_valor
+        if es_variable:
+            # Si es una variable se devuelve es el valor que almacena 
+            # dicha variable
+            valor_variable = pila_de_tablas.esta_en_las_tablas(self.nombre)[1]
+            # En esta parte se puede colocar la verificacion de que la variable este 
+            # inicializada
+
+            return valor_variable
         
+        if self.tipo_expr == 'EXP_ARITMETICA':
+            # Se ve que tipo de operacion es y se realiza dicha operacion
+            if self.tipo_oper == '+':
+                return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
+            if self.tipo_oper == '-':
+                return self.children[0].evaluar_arbol() - self.children[1].evaluar_arbol()
+            if self.tipo_oper == '*':
+                return self.children[0].evaluar_arbol() * self.children[1].evaluar_arbol()
+            if self.tipo_oper == '/':
+                # Aqui se puede colocar la verificacion de la division por 0
+                return int(self.children[0].evaluar_arbol() / self.children[1].evaluar_arbol())
+            if self.tipo_oper == 'menos_unario':
+                return -self.children[0].evaluar_arbol()
+            
 
 
 
@@ -532,8 +572,7 @@ if __name__ == "__main__":
         print(result)
         print('--------------------------------------------------')
         print("----------------Tablas de simbolos----------------")
+        # Ejecucion de las instrucciones del arbol
+        result.evaluar_arbol()
         for i in pila_de_tablas.pila:
-            print(i.tabla)  
-
-
-
+            print(i.tabla) 
