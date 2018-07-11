@@ -270,9 +270,9 @@ def p_literal(p):
     if isinstance(p[1], int):
         p[0] = Node('LITERAL ENTERO',leaf='- valor: ' + str(p[1]), tipo_dato='int', nodo_valor=p[1], tipo_expr='LITERAL ENTERO')
     elif p[1] == 'true':
-        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool', nodo_valor=p[1], tipo_expr='LITERAL BOOLEANO')
+        p[0] = Node('LITERAL BOOLEANO', leaf="- valor: " + p[1], tipo_dato='bool', nodo_valor=True, tipo_expr='LITERAL BOOLEANO')
     elif p[1] == 'false':
-        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool', nodo_valor = p[1], tipo_expr='LITERAL BOOLEANO')
+        p[0] = Node('LITERAL BOOLEANO',leaf='- valor: ' + p[1], tipo_dato='bool', nodo_valor =False, tipo_expr='LITERAL BOOLEANO')
     elif isinstance(p[1], str) and p[1] != '(':
         p[0] = Node('LITERAL CARACTER',leaf='- valor: ' + p[1], tipo_dato='char', nodo_valor=p[1], tipo_expr='LITERAL CARACTER')
     else:
@@ -346,7 +346,7 @@ def p_expresion_booleana(p):
     if p[1] == 'not':
         p[2].type = '- operador: ' + p[2].type 
         es_valido = p[2].type == '- operador: LITERAL BOOLEANO' or (p[2].type == '- operador: VARIABLE' and p[2].tipo_dato == 'bool') or (p[2].type == '- operador: EXP_BOOLEANA' and p[2].valido) or (p[2].type == '- operador: BIN_RELACIONAL' and p[2].valido)
-        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1], valido=es_valido, tipo_dato='bool')
+        p[0] = Node('EXP_BOOLEANA', [p[2]], '- operacion: ' + p[1], valido=es_valido, tipo_dato='bool', tipo_expr='EXP_BOOLEANA', tipo_oper=p[1])
     elif len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4 and p[1] == '(':
@@ -357,7 +357,7 @@ def p_expresion_booleana(p):
         es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL BOOLEANO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'bool') or (p[1].type == '- operador izquierdo: EXP_BOOLEANA' and p[1].valido) or (p[1].type == '- operador izquierdo: BIN_RELACIONAL' and p[1].valido)
         es_valido_derecho = p[3].type == '- operador derecho: LITERAL BOOLEANO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'bool') or (p[3].type == '- operador derecho: EXP_BOOLEANA' and p[3].valido) or (p[3].type == '- operador derecho: BIN_RELACIONAL' and p[3].valido)
         es_valido = es_valido_izquierdo and es_valido_derecho
-        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool')        
+        p[0] = Node('EXP_BOOLEANA',[p[1], p[3]], '- operacion: ' + operadores[p[2]], valido=es_valido, tipo_dato='bool', tipo_expr='EXP_BOOLEANA', tipo_oper=operadores[p[2]])        
 
 def p_expresion_booleana_literal_identificador(p):
     '''
@@ -555,7 +555,17 @@ class Node:
                 return int(self.children[0].evaluar_arbol() / self.children[1].evaluar_arbol())
             if self.tipo_oper == 'menos_unario':
                 return -self.children[0].evaluar_arbol()
-            
+
+        if self.tipo_expr == 'EXP_BOOLEANA':
+            # Se ve que tipo de operacion es y se realiza la operacion
+            if self.tipo_oper == 'not':
+                return not self.children[0].evaluar_arbol()
+            if self.tipo_oper == 'Conjunción':
+                # Lado derecho operado con lado izquierdo
+                return self.children[0].evaluar_arbol() and self.children[1].evaluar_arbol()
+            if self.tipo_oper == 'Disyunción':
+                # Lado derecho operado con lado izquierdo
+                return self.children[0].evaluar_arbol() or self.children[1].evaluar_arbol()
 
 
 
