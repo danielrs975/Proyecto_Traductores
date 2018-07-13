@@ -401,7 +401,7 @@ def p_expresion_arreglos(p):
     '''
     expresion_arreglos  : identificador TkConcatenacion expresion_arreglos
                         | TkShift expresion_arreglos
-                        | expresion_arreglos TkCorcheteAbre expresion_aritmetica TkCorcheteCierra
+                        | expresion_arreglos TkCorcheteAbre expresion TkCorcheteCierra
     '''
     if len(p) == 4:
         p[1].type = '- operador izquierdo: ' + p[1].type 
@@ -548,7 +548,6 @@ class Node:
         elif self.tipo_expr == "ITERACION INDETERMINADA":
             #Guardamos valor de la guardia
             se_cumple_guardia = self.children[0].evaluar_arbol()
-            print(se_cumple_guardia)
             while se_cumple_guardia:
                 self.children[1].evaluar_arbol()
                 se_cumple_guardia = self.children[0].evaluar_arbol()
@@ -589,13 +588,31 @@ class Node:
         if self.tipo_expr == 'EXP_ARITMETICA':
             # Se ve que tipo de operacion es y se realiza dicha operacion
             if self.tipo_oper == '+':
-                return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    return
+                else:
+                    return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
             if self.tipo_oper == '-':
-                return self.children[0].evaluar_arbol() - self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    return
+                else:
+                    return self.children[0].evaluar_arbol() - self.children[1].evaluar_arbol()
             if self.tipo_oper == '*':
-                return self.children[0].evaluar_arbol() * self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    return
+                else:
+                    return self.children[0].evaluar_arbol() * self.children[1].evaluar_arbol()
             if self.tipo_oper == '/':
                 # Aqui se puede colocar la verificacion de la division por 0
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    return
+                elif self.children[1].evaluar_arbol() == 0:
+                    print("Division por cero")
+                    return
                 return int(self.children[0].evaluar_arbol() / self.children[1].evaluar_arbol())
             if self.tipo_oper == 'menos_unario':
                 return -self.children[0].evaluar_arbol()
@@ -639,9 +656,24 @@ class Node:
                 caracter = self.children[0].evaluar_arbol()[1]
                 return ord(caracter)
 
-        # if self.tipo_expr == 'EXP_ARREGLOS':
-        #     # Se ve que tipo de operacion es y se ejecuta
-        #     if self.tipo_oper == 'Concatenacion':
+        if self.tipo_expr == "EXP_ARREGLOS":
+            # expresiones de arreglos, operacion concat,shift y acceder/modificar
+            if self.tipo_oper == "Concatenacion":
+                return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
+            elif self.tipo_oper == "Shift":
+                result = []
+                N = len(self.children[0].evaluar_arbol())
+                n = N
+                it = 0
+                for item in self.children[0].evaluar_arbol():
+                    n = ((N+it)-1) % N
+                    result[it] = item[n]
+                    it += 1
+                return result
+            # else: #op de indexar
+                
+
+                
 
         
 #------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
