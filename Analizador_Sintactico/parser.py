@@ -108,7 +108,7 @@ def p_secuenciacion2(p):
     if p[2] == None:
         p[0] = p[1]
     else:
-        p[0] = Node('', [p[1], p[2]])
+        p[0] = Node('', [p[1], p[2]], tipo_expr='SECUENCIACION')
 
 def p_secuenciacion_instruccion(p):
     '''
@@ -548,6 +548,7 @@ class Node:
         elif self.tipo_expr == "ITERACION INDETERMINADA":
             #Guardamos valor de la guardia
             se_cumple_guardia = self.children[0].evaluar_arbol()
+            print(se_cumple_guardia)
             while se_cumple_guardia:
                 self.children[1].evaluar_arbol()
                 se_cumple_guardia = self.children[0].evaluar_arbol()
