@@ -22,9 +22,9 @@ def p_programa(p):
                 | TkBegin secuenciacion TkEnd
     '''
     if len(p) > 4:
-        p[0] = p[4]
+        p[0] = [p[4], p[2]]
     else:
-        p[0] = p[2]
+        p[0] = [p[2]]
 
 #------------------------ Este es la definicion del bloque de declaraciones ------------------#
 # Esta parte no hay que reportarla 
@@ -39,7 +39,11 @@ def p_lista_declaraciones(p): #Nuevo
         p[0] = Tabla_simbolo()
         for i in p[2]:
             if p[0].existe_tabla(i) == False:
-                p[0].anadir_tabla(i, p[4])
+                if p[4][0] == 'array':
+                    arreglo = []
+                    for k in range(0,p[4][2]):
+                        arreglo = arreglo + [None]
+                p[0].anadir_tabla(i, p[4], arreglo)
             else:
                 print('Se esta declarando una variable ya declarada: ' + i)
                 sys.exit()
@@ -80,7 +84,7 @@ def p_tipo(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = p[1] + " " + p[6]
+        p[0] = [p[1], p[6], p[3].evaluar_arbol()]
 # ---------------------------------------------------------------------------------------------#
 
 #--------------------------Funcion importante para manejar recursion--------------------------#
@@ -133,12 +137,19 @@ def p_asignacion(p): #Nuevo
     '''
     asignacion  : identificador TkAsignacion expresion TkPuntoYComa
                 | identificador TkPunto expresion_aritmetica TkPuntoYComa
+                | expresion_arreglos TkAsignacion expresion TkPuntoYComa
     '''
     if pila_de_iteradores.esta_en_las_tablas(p[1].nombre)==False:
-        if p[2] == '<-':
+        if p[2] == '<-' and p[1].tipo_expr != 'EXP_ARREGLOS':
             p[1].type = '- contenedor: ' + p[1].type
             p[3].type = '- expresion: ' + p[3].type
             es_valido = p[1].tipo_dato == p[3].tipo_dato and pila_de_tablas.esta_en_las_tablas(p[1].nombre)!=False and len(pila_de_tablas.pila) > 0
+            p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido, tipo_expr='ASIGNACION')
+        elif p[1].tipo_expr == 'EXP_ARREGLOS':
+            p[1].type = '- contenedor: ' + p[1].type
+            p[3].type = '- expresion: ' + p[3].type 
+            es_valido = len(pila_de_tablas.pila) > 0
+            print(es_valido)
             p[0] = Node('ASIGNACION',[p[1], p[3]], valido=es_valido, tipo_expr='ASIGNACION')
         else:
             p[1].type = '- contenedor: ' + p[1].type
@@ -246,11 +257,13 @@ def p_identificador(p): #Nuevo aqui se deberia poner algo pero no estoy segura
         p[0] = p[2]
     else:
         if len(pila_de_tablas.pila) > 0:
-            
             if pila_de_tablas.esta_en_las_tablas(p[1])==False:
                 p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=False, tipo_expr='VARIABLE')
             else:
-                 p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=pila_de_tablas.esta_en_las_tablas(p[1])[0], tipo_expr='VARIABLE')
+                tipo_de_dato = pila_de_tablas.esta_en_las_tablas(p[1])[0]
+                if type(tipo_de_dato) == list:
+                    tipo_de_dato = tipo_de_dato[0] + " " +  tipo_de_dato[1]
+                p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_dato=tipo_de_dato, tipo_expr='VARIABLE')
         else:
             p[0] = Node('VARIABLE',leaf="- identificador: " + p[1], nombre=p[1], tipo_expr='VARIABLE')
 
@@ -639,10 +652,12 @@ class Node:
                 caracter = self.children[0].evaluar_arbol()[1]
                 return ord(caracter)
 
-        # if self.tipo_expr == 'EXP_ARREGLOS':
-        #     # Se ve que tipo de operacion es y se ejecuta
-        #     if self.tipo_oper == 'Concatenacion':
-
+        if self.tipo_expr == 'EXP_ARREGLOS':
+            # Se ve que tipo de operacion es y se ejecuta
+            if self.tipo_oper == 'Concatenacion':
+                pass
+            elif self.tipo_oper == 'indexacion':
+                print("hola")
         
 #------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
 
@@ -654,10 +669,10 @@ if __name__ == "__main__":
     else:
         result = parser.parse(entrada)
         print("-------------Arbol sintactico abstracto----------")
-        print(result)
+        print(result[0])
         print('--------------------------------------------------')
         print("----------------Tablas de simbolos----------------")
         # Ejecucion de las instrucciones del arbol
-        result.evaluar_arbol()
+        result[0].evaluar_arbol()
         for i in pila_de_tablas.pila:
             print(i.tabla) 

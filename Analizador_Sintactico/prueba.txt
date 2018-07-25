@@ -1,15 +1,14 @@
+with
+    var x: int
+    var y: bool
+    var z: char
+    var w: array [5] of int
 begin
-    with
-        var x: int
-        var y: bool
-        var z: char
-        var w: array [5] of int
-    begin
-        x <- 0;
-        while x < 5 ->
-            x <- x + 1;
-            print x;
-            x <- x+1;
-        end
-    end 
-end
+    x <- 0;
+    w[0] <- 3;
+    while x < 5 ->
+        x <- x + 1;
+        print x;
+        x <- x+1;
+    end
+end 
