@@ -414,7 +414,7 @@ def p_expresion_arreglos(p):
     '''
     expresion_arreglos  : identificador TkConcatenacion expresion_arreglos
                         | TkShift expresion_arreglos
-                        | expresion_arreglos TkCorcheteAbre expresion_aritmetica TkCorcheteCierra
+                        | expresion_arreglos TkCorcheteAbre expresion TkCorcheteCierra
     '''
     if len(p) == 4:
         p[1].type = '- operador izquierdo: ' + p[1].type 
@@ -535,11 +535,19 @@ class Node:
             variable = self.children[0].nombre
             # Lado derecho de la asignacion es una expresion guardamos el valor de dicha expresion
             valor = self.children[1].evaluar_arbol()
-            pila_de_tablas.modificar_valor_pila(variable, valor)
+            if valor == None:
+                print("Error, la variable no ha sido inicializada")
+                sys.exit()
+            else:
+                pila_de_tablas.modificar_valor_pila(variable, valor)
         elif self.tipo_expr == "ENTRADA-SALIDA":
             # Primero se ve que operacion se esta haciendo
             if self.tipo_oper == 'print':
-                print(self.children[0].evaluar_arbol())
+                if self.children[0].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    print(self.children[0].evaluar_arbol())
             if self.tipo_oper == 'read':
                 # Aqui hay que verficar que el tipo de la variable y el que esta 
                 # ingresando el usuario sean los mismos 
@@ -561,27 +569,34 @@ class Node:
         elif self.tipo_expr == "ITERACION INDETERMINADA":
             #Guardamos valor de la guardia
             se_cumple_guardia = self.children[0].evaluar_arbol()
-            print(se_cumple_guardia)
             while se_cumple_guardia:
                 self.children[1].evaluar_arbol()
                 se_cumple_guardia = self.children[0].evaluar_arbol()
         elif self.tipo_expr == "ITERACION DETERMINADA":
             #for sin token step
             if len(self.children) == 4:
-                iterador = self.children[0].nombre
-                from_ = self.children[1].evaluar_arbol()
-                to_ = self.children[2].evaluar_arbol()
-                for i in range(from_, to_):
-                    pila_de_tablas.modificar_valor_pila(iterador,i)
-                    self.children[3].evaluar_arbol()
+                if self.children[1].evaluar_arbol() == None or self.children[2].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    iterador = self.children[0].nombre
+                    from_ = self.children[1].evaluar_arbol()
+                    to_ = self.children[2].evaluar_arbol()
+                    for i in range(from_, to_):
+                        pila_de_tablas.modificar_valor_pila(iterador,i)
+                        self.children[3].evaluar_arbol()
             else:
-                iterador = self.children[0].nombre
-                from_ = self.children[1].evaluar_arbol()
-                to_ = self.children[2].evaluar_arbol()
-                step_ = self.children[3].evaluar_arbol()
-                for i in range(from_, to_, step_):
-                    pila_de_tablas.modificar_valor_pila(iterador,i) 
-                    self.children[4].evaluar_arbol()
+                if self.children[1].evaluar_arbol() == None or self.children[2].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    iterador = self.children[0].nombre
+                    from_ = self.children[1].evaluar_arbol()
+                    to_ = self.children[2].evaluar_arbol()
+                    step_ = self.children[3].evaluar_arbol()
+                    for i in range(from_, to_, step_):
+                        pila_de_tablas.modificar_valor_pila(iterador,i) 
+                        self.children[4].evaluar_arbol()
         
         # -------------------------------------------------------------------------------------------
 
@@ -602,42 +617,100 @@ class Node:
         if self.tipo_expr == 'EXP_ARITMETICA':
             # Se ve que tipo de operacion es y se realiza dicha operacion
             if self.tipo_oper == '+':
-                return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()
             if self.tipo_oper == '-':
-                return self.children[0].evaluar_arbol() - self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() - self.children[1].evaluar_arbol()
             if self.tipo_oper == '*':
-                return self.children[0].evaluar_arbol() * self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() * self.children[1].evaluar_arbol()
             if self.tipo_oper == '/':
                 # Aqui se puede colocar la verificacion de la division por 0
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                elif self.children[1].evaluar_arbol() == 0:
+                    print("Division por cero")
+                    sys.exit()
                 return int(self.children[0].evaluar_arbol() / self.children[1].evaluar_arbol())
             if self.tipo_oper == 'menos_unario':
-                return -self.children[0].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return -self.children[0].evaluar_arbol()
 
         if self.tipo_expr == 'EXP_BOOLEANA':
             # Se ve que tipo de operacion es y se realiza la operacion
             if self.tipo_oper == 'not':
-                return not self.children[0].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return not self.children[0].evaluar_arbol()
             if self.tipo_oper == 'Conjunción':
                 # Lado derecho operado con lado izquierdo
-                return self.children[0].evaluar_arbol() and self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() and self.children[1].evaluar_arbol()
             if self.tipo_oper == 'Disyunción':
                 # Lado derecho operado con lado izquierdo
-                return self.children[0].evaluar_arbol() or self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() or self.children[1].evaluar_arbol()
 
         if self.tipo_expr == 'BIN_RELACIONAL':
             # Se ve que tipo de operacion es y se realiza la operacion
             if self.tipo_oper == '>':
-                return self.children[0].evaluar_arbol() > self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() > self.children[1].evaluar_arbol()
             if self.tipo_oper == '<':
-                return self.children[0].evaluar_arbol() < self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() < self.children[1].evaluar_arbol()
             if self.tipo_oper == '<=':
-                return self.children[0].evaluar_arbol() <= self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() <= self.children[1].evaluar_arbol()
             if self.tipo_oper == '>=':
-                return self.children[0].evaluar_arbol() >= self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() >= self.children[1].evaluar_arbol()
             if self.tipo_oper == '=':
-                return self.children[0].evaluar_arbol() == self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() == self.children[1].evaluar_arbol()
             if self.tipo_oper == '/=':
-                return self.children[0].evaluar_arbol() != self.children[1].evaluar_arbol()
+                if self.children[0].evaluar_arbol() == None or self.children[1].evaluar_arbol() == None:
+                    print("Error, la variable no ha sido inicializada")
+                    sys.exit()
+                else:
+                    return self.children[0].evaluar_arbol() != self.children[1].evaluar_arbol()
 
         if self.tipo_expr == 'EXP_CARACTER':
             # Se ve que tipo de operacion es y se ejecuta
@@ -655,9 +728,25 @@ class Node:
         if self.tipo_expr == 'EXP_ARREGLOS':
             # Se ve que tipo de operacion es y se ejecuta
             if self.tipo_oper == 'Concatenacion':
-                pass
+                return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()                
             elif self.tipo_oper == 'indexacion':
                 print("hola")
+            # expresiones de arreglos, operacion concat,shift y acceder/modificar
+            elif self.tipo_oper == "Shift":
+                result = []
+                N = len(self.children[0].evaluar_arbol())
+                n = N
+                it = 0
+                for item in self.children[0].evaluar_arbol():
+                    n = ((N+it)-1) % N
+                    result[it] = item[n]
+                    it += 1
+                return result
+            # else: #op de indexar
+                
+
+                
+
         
 #------------------------------- Se termina las reglas de la gramatica para BasicTran--------------#
 
