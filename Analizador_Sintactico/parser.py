@@ -315,8 +315,8 @@ def p_expresion_aritmetica(p):
     if len(p) > 3:
         p[1].type = '- operador izquierdo: ' + p[1].type
         p[3].type = '- operador derecho: ' + p[3].type
-        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido) 
-        es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido)
+        es_valido_izquierdo = p[1].type == '- operador izquierdo: LITERAL ENTERO' or (p[1].type == '- operador izquierdo: VARIABLE' and p[1].tipo_dato == 'int') or (p[1].type == '- operador izquierdo: EXP_ARITMETICA' and p[1].valido) or (p[1].type == '- operador izquierdo: EXP_ARREGLOS' and p[1].valido) 
+        es_valido_derecho = p[3].type == '- operador derecho: LITERAL ENTERO' or (p[3].type == '- operador derecho: VARIABLE' and p[3].tipo_dato == 'int') or (p[3].type == '- operador derecho: EXP_ARITMETICA' and p[3].valido) or (p[3].type == '- operador derecho: EXP_ARREGLOS' and p[3].valido) 
         es_valido = es_valido_izquierdo and es_valido_derecho
       
         p[0] = Node('EXP_ARITMETICA', [p[1], p[3]], '- operacion: ' + p[2], valido=es_valido, tipo_dato='int', tipo_expr="EXP_ARITMETICA", tipo_oper=p[2])
@@ -333,6 +333,7 @@ def p_expresion_aritmetica_literal_identificador(p):
     expresion_aritmetica    : literal
                             | identificador
                             | TkParAbre expresion_aritmetica TkParCierra
+                            | expresion_arreglos
                             | empty
     '''
     if p[1] == '(':
@@ -414,7 +415,7 @@ def p_expresion_arreglos(p):
     '''
     expresion_arreglos  : identificador TkConcatenacion expresion_arreglos
                         | TkShift expresion_arreglos
-                        | expresion_arreglos TkCorcheteAbre expresion TkCorcheteCierra
+                        | identificador TkCorcheteAbre expresion TkCorcheteCierra
     '''
     if len(p) == 4:
         p[1].type = '- operador izquierdo: ' + p[1].type 
@@ -429,7 +430,7 @@ def p_expresion_arreglos(p):
         p[1].type = '- contenedor: ' + p[1].type
         p[3].type = '- indexacion: ' + p[3].type
         es_valido = p[1].type == '- contenedor: VARIABLE' and p[1].tipo_dato[:5] == 'array' and ((p[3].type == '- indexacion: EXP_ARITMETICA' and p[3].valido) or (p[3].type == '- indexacion: LITERAL ENTERO') or (p[3].type == '- indexacion: VARIABLE' and p[3].tipo_dato == 'int'))
-        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]], valido=es_valido, tipo_dato=p[1].tipo_dato, tipo_expr='EXP_ARREGLOS', tipo_oper='indexacion')
+        p[0] = Node('EXP_ARREGLOS', [p[1],p[3]], valido=es_valido, tipo_dato=p[1].tipo_dato, tipo_expr='EXP_ARREGLOS', tipo_oper='indexacion', nombre=p[1].nombre, indexacion=p[3])
     
 
 def p_expresion_arreglos_literal(p):
@@ -482,7 +483,7 @@ def p_error(p):
     
 #------------------------------------ Clase para la construccion del arbol------------------------------#
 class Node:
-    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None, nodo_valor = None, tipo_expr=None, tipo_oper=None):
+    def __init__(self, type, children=None,leaf=None, tabla_s=None, valido=None, nombre=None, tipo_dato=None, nodo_valor = None, tipo_expr=None, tipo_oper=None, indexacion=None):
         self.type = type
         if children:
             self.children = children 
@@ -496,6 +497,7 @@ class Node:
         self.nodo_valor = nodo_valor
         self.tipo_expr = tipo_expr
         self.tipo_oper = tipo_oper
+        self.indexacion = indexacion
     respuesta = ''
     tipo = ''
 
@@ -533,13 +535,21 @@ class Node:
         elif self.tipo_expr == "ASIGNACION":
             # Lado izquierdo de la asignacion 
             variable = self.children[0].nombre
+            # Ve si la contenedor es una variable indexada 
+            # si lo es la variable indexacion sera distinta de none 
+            indexacion = self.children[0].indexacion
+            if indexacion != None:
+                # Si es distinta de none entonces se procede a evaluar la expresion entre 
+                # corchetes 
+                indexacion = indexacion.evaluar_arbol()
+
             # Lado derecho de la asignacion es una expresion guardamos el valor de dicha expresion
             valor = self.children[1].evaluar_arbol()
             if valor == None:
                 print("Error, la variable no ha sido inicializada")
                 sys.exit()
             else:
-                pila_de_tablas.modificar_valor_pila(variable, valor)
+                pila_de_tablas.modificar_valor_pila(variable, valor, indexacion)
         elif self.tipo_expr == "ENTRADA-SALIDA":
             # Primero se ve que operacion se esta haciendo
             if self.tipo_oper == 'print':
@@ -724,14 +734,19 @@ class Node:
             if self.tipo_oper == '#':
                 caracter = self.children[0].evaluar_arbol()[1]
                 return ord(caracter)
-
+            
         if self.tipo_expr == 'EXP_ARREGLOS':
             # Se ve que tipo de operacion es y se ejecuta
             if self.tipo_oper == 'Concatenacion':
                 return self.children[0].evaluar_arbol() + self.children[1].evaluar_arbol()                
-            elif self.tipo_oper == 'indexacion':
-                print("hola")
             # expresiones de arreglos, operacion concat,shift y acceder/modificar
+            if self.tipo_oper == 'indexacion':
+                # Esta parte se usa cuando la operacion indexacion aparace del lado izquierdo 
+                # de cualquier operacion
+                variable = self.nombre 
+                indexacion = self.indexacion.evaluar_arbol()
+                valor = pila_de_tablas.esta_en_las_tablas(variable)[1]
+                return valor[indexacion]
             elif self.tipo_oper == "Shift":
                 result = []
                 N = len(self.children[0].evaluar_arbol())
@@ -742,7 +757,6 @@ class Node:
                     result[it] = item[n]
                     it += 1
                 return result
-            # else: #op de indexar
                 
 
                 

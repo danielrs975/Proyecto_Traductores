@@ -58,12 +58,15 @@ class Pila_tablas:
             return False
         return False
 
-    def modificar_valor_pila(self, id, valor):
+    def modificar_valor_pila(self, id, valor, indexacion=None):
         x = self.esta_en_las_tablas(id)
         if not x:
             print("Error, variable " + id + " no declarada")
             sys.exit()
-        x[1] = valor
+        if indexacion == None:
+            x[1] = valor
+        else:
+            x[1][indexacion] = valor
             
 
     def vacio(self):

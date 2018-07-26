@@ -6,9 +6,8 @@ with
 begin
     x <- 0;
     w[0] <- 3;
-    while x < 5 ->
-        x <- x + 1;
-        print x;
-        x <- x+1;
+    for x from 0 to 5 ->
+        w[x] <- w[x] + 1;
+        print w[x];
     end
 end 
